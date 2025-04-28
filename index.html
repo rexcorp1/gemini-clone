@@ -216,6 +216,10 @@
             width: var(--sidebar-collapsed-width);
         }
 
+        .sidebar.collapsed #recent-chats-list li {
+            display: none;
+        }
+
         /* Header Sidebar Mobile */
         .sidebar-mobile-header {
             display: none;
@@ -1455,12 +1459,178 @@
             padding-right: var(--chat-container-padding-x);
         }
 
+        .model-response .message-action-more-mobile {
+            display: none;
+        }
+
+        .auth-popup {
+            display: none;
+            /* Sembunyikan secara default */
+            position: absolute;
+            top: calc(var(--header-height) - 8px);
+            /* Sesuaikan jarak dari atas */
+            right: 16px;
+            /* Sesuaikan jarak dari kanan */
+            background-color: var(--gem-sys-color--surface-container-high);
+            /* Warna background */
+            border-radius: 16px;
+            /* Sudut melengkung */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            /* Bayangan */
+            padding: 16px;
+            z-index: 1003;
+            /* Pastikan di atas elemen lain */
+            min-width: 280px;
+            /* Lebar minimum */
+            border: 1px solid var(--gem-sys-color--outline-variant);
+        }
+
+        .auth-popup.show {
+            display: block;
+            /* Tampilkan saat class 'show' ditambahkan */
+        }
+
+        /* Kontrol tampilan logged-in vs logged-out */
+        .auth-popup .popup-logged-in,
+        .auth-popup .popup-logged-out {
+            display: none;
+            /* Sembunyikan kedua section by default */
+            text-align: center;
+        }
+
+        .auth-popup.view-logged-in .popup-logged-in {
+            display: block;
+            /* Tampilkan section logged-in jika ada class view-logged-in */
+        }
+
+        .auth-popup.view-logged-out .popup-logged-out {
+            display: block;
+            /* Tampilkan section logged-out jika ada class view-logged-out */
+        }
+
+
+        .popup-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 12px auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .popup-guest-text {
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .popup-user-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .popup-user-email {
+            font-size: 13px;
+            color: var(--gem-sys-color--on-surface-variant);
+            margin-bottom: 16px;
+            word-break: break-all;
+            /* Agar email panjang tidak overflow */
+        }
+
+        .popup-button {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            border: 1px solid var(--gem-sys-color--outline);
+            border-radius: 20px;
+            text-align: center;
+            background-color: transparent;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 14px;
+            color: var(--gem-sys-color--primary);
+            /* Warna teks tombol */
+            font-weight: 500;
+        }
+
+        .popup-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+        }
+
         /* --- Responsiveness (MOBILE OVERRIDES) --- */
         @media screen and (max-width: 960px) {
             :root {
                 --chat-container-padding-x: 12px;
                 --input-area-min-height: auto;
                 --bottom-area-height: calc(50px + 12px + 12px + 12px);
+            }
+
+            /* Atur layout bubble AI di mobile */
+            .model-response .message-bubble {
+                display: flex;
+                /* Gunakan flexbox */
+                flex-wrap: wrap;
+                /* Izinkan item pindah ke baris baru */
+                align-items: center;
+                /* Sejajarkan avatar & ikon titik tiga secara vertikal */
+                justify-content: space-between;
+                /* Dorong avatar ke kiri, ikon ke kanan */
+                gap: 4px 0;
+                /* Jarak vertikal antar baris, tanpa jarak horizontal */
+                position: relative;
+                /* Untuk positioning absolut jika diperlukan nanti */
+            }
+
+            /* Pastikan avatar tidak menyusut */
+            .model-response .message-avatar {
+                flex-shrink: 0;
+                /* Ukuran dan style lain tetap */
+            }
+
+            /* Target khusus untuk tombol titik tiga di mobile */
+            .model-response .message-action-more-mobile {
+                display: inline-flex;
+                /* Tampilkan tombol ini */
+                width: 28px;
+                /* Sesuaikan ukuran jika perlu */
+                height: 28px;
+                color: var(--gem-sys-color--on-surface-variant);
+                /* Style lain bisa disamakan dengan .message-actions .icon-button */
+            }
+
+            .model-response .message-action-more-mobile:hover {
+                background-color: var(--bard-color-input-area-buttons-hover-background);
+            }
+
+            .model-response .message-action-more-mobile .material-symbols-outlined {
+                font-size: 18px;
+            }
+
+
+            /* Wrapper konten (teks & actions asli) ambil lebar penuh & pindah ke bawah */
+            .model-response .message-content-wrapper {
+                width: 100%;
+                /* Ambil lebar penuh */
+                order: 3;
+                /* Pastikan muncul setelah avatar dan ikon titik tiga */
+                padding-left: 0;
+                /* Hapus padding kiri default jika ada */
+                margin-top: 4px;
+                /* Beri sedikit jarak dari baris atas */
+            }
+
+            /* Sembunyikan container actions asli di mobile */
+            .model-response .message-actions {
+                display: none;
+            }
+
+            /* Pastikan teks pesan tidak punya padding aneh */
+            .model-response .message-text {
+                /* Padding asli (padding: 10px 16px;) mungkin perlu disesuaikan */
+                /* Misalnya, hapus padding kiri/kanan jika wrapper sudah full width */
+                padding: 10px 0;
+                /* Contoh: Hanya padding atas/bawah */
             }
 
             .chat-app {
@@ -1890,6 +2060,24 @@
                     </button>
                 </div>
             </header>
+
+            <!-- === TAMBAHKAN POPUP MENU DI SINI === -->
+            <div id="auth-popup-menu" class="auth-popup">
+                <!-- Konten saat Logged Out -->
+                <div class="popup-logged-out">
+                    <img id="popup-default-avatar" src="https://lh3.googleusercontent.com/a/default-user=s64-c"
+                        alt="Guest Avatar" class="popup-avatar">
+                    <p class="popup-guest-text">Guest</p>
+                    <button id="popup-signin-button" class="popup-button">Sign in with Google</button>
+                </div>
+                <!-- Konten saat Logged In -->
+                <div class="popup-logged-in">
+                    <img id="popup-user-avatar" src="" alt="User Avatar" class="popup-avatar">
+                    <p id="popup-user-name" class="popup-user-name"></p>
+                    <p id="popup-user-email" class="popup-user-email"></p>
+                    <button id="popup-signout-button" class="popup-button">Sign out</button>
+                </div>
+            </div>
 
             <div class="chat-history-container" id="chat-history">
                 <div class="chat-content-wrapper">

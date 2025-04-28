@@ -1,14 +1,14 @@
 // --- Firebase Configuration ---
 // Ganti dengan konfigurasi Firebase project kamu!
 const firebaseConfig = {
-    apiKey: "AIzaSyDsJE-CEu2JcEbcuZvNRMTPsSgepknoH-A",
-    authDomain: "gemini-clone-6784a.firebaseapp.com",
-    projectId: "gemini-clone-6784a",
-    storageBucket: "gemini-clone-6784a.firebasestorage.app",
-    messagingSenderId: "887785035794",
-    appId: "1:887785035794:web:acd3409e097bea445320cb",
-    measurementId: "G-1Q6LGMHY7P"
-};
+    apiKey: "AIzaSyDsJE-CEu2JcEbcuZvNRMTPsSgepknoH-A", // <-- Ganti jika perlu
+    authDomain: "gemini-clone-6784a.firebaseapp.com", // <-- Ganti jika perlu
+    projectId: "gemini-clone-6784a", // <-- Ganti jika perlu
+    storageBucket: "gemini-clone-6784a.firebasestorage.app", // <-- Ganti jika perlu
+    messagingSenderId: "887785035794", // <-- Ganti jika perlu
+    appId: "1:887785035794:web:acd3409e097bea445320cb", // <-- Ganti jika perlu
+    measurementId: "G-1Q6LGMHY7P" // <-- Ganti jika perlu
+  };
 
 // Initialize Firebase (Gunakan sintaks v8/compat)
 let app, auth, db;
@@ -67,6 +67,15 @@ const authButtonMobile = document.getElementById('auth-button-mobile');
 const userProfileImgMobile = document.getElementById('user-profile-img-mobile');
 const loginIconMobile = document.getElementById('login-icon-mobile');
 
+// --- Konstanta Elemen Auth Popup ---
+const authPopupMenu = document.getElementById('auth-popup-menu');
+const popupDefaultAvatar = document.getElementById('popup-default-avatar'); // Pastikan ID ini ada di HTML
+const popupUserAvatar = document.getElementById('popup-user-avatar');
+const popupUserName = document.getElementById('popup-user-name');
+const popupUserEmail = document.getElementById('popup-user-email');
+const popupSigninButton = document.getElementById('popup-signin-button');
+const popupSignoutButton = document.getElementById('popup-signout-button');
+
 
 // --- Variabel State ---
 let isMobile = window.innerWidth <= 960;
@@ -82,27 +91,70 @@ let currentUser = null;
 let isLoggedIn = false;
 let currentChatId = null; // ID chat Firestore yang aktif
 let unsubscribeChatsListener = null; // Fungsi untuk stop listener Firestore
+let isAuthPopupOpen = false; // State untuk popup auth
 
 // --- Konfigurasi API ---
 // API Key DIHAPUS
 
+// --- Fungsi Auth Popup ---
+function updateAuthPopupContent() {
+    if (!authPopupMenu) return; // Pastikan elemen popup ada
+
+    if (isLoggedIn && currentUser) {
+        authPopupMenu.classList.remove('view-logged-out');
+        authPopupMenu.classList.add('view-logged-in');
+        if (popupUserAvatar) popupUserAvatar.src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.email || 'U')}&background=random&color=fff`;
+        if (popupUserName) popupUserName.textContent = currentUser.displayName || 'User';
+        if (popupUserEmail) popupUserEmail.textContent = currentUser.email || '';
+    } else {
+        authPopupMenu.classList.remove('view-logged-in');
+        authPopupMenu.classList.add('view-logged-out');
+        // Avatar default sudah di set di HTML src
+    }
+}
+
+function toggleAuthPopup() {
+    if (!authPopupMenu) return;
+
+    if (isAuthPopupOpen) {
+        authPopupMenu.classList.remove('show');
+        isAuthPopupOpen = false;
+    } else {
+        updateAuthPopupContent(); // Update konten SEBELUM ditampilkan
+        authPopupMenu.classList.add('show');
+        isAuthPopupOpen = true;
+    }
+}
+
 // --- Fungsi UI: Sidebar, Bottom Sheet, Dropdown, Resize ---
 function closeModelDropdown() {
-    modelDropdownMenu?.classList.remove('show');
-    modeSwitcherButton.classList.remove('open');
-    modeSwitcherButton.setAttribute('aria-expanded', 'false');
+    if (modelDropdownMenu) {
+        modelDropdownMenu.classList.remove('show');
+    }
+    if (modeSwitcherButton) {
+        modeSwitcherButton.classList.remove('open');
+        modeSwitcherButton.setAttribute('aria-expanded', 'false');
+    }
 }
 
 function closeModelBottomSheet() {
     if (!isSidenavOpen && isMobile) {
-        document.body.style.overflow = '';
+         document.body.style.overflow = '';
     } else if (!isMobile) {
         document.body.style.overflow = '';
     }
-    modelBottomSheet.classList.remove('show');
-    bottomSheetScrim.classList.remove('visible');
-    modeSwitcherButton.setAttribute('aria-expanded', 'false');
-    if (sidebarModeSwitcherButton) sidebarModeSwitcherButton.setAttribute('aria-expanded', 'false');
+    if (modelBottomSheet) {
+        modelBottomSheet.classList.remove('show');
+    }
+    if (bottomSheetScrim) {
+        bottomSheetScrim.classList.remove('visible');
+    }
+    if (modeSwitcherButton) {
+        modeSwitcherButton.setAttribute('aria-expanded', 'false');
+    }
+    if (sidebarModeSwitcherButton) {
+        sidebarModeSwitcherButton.setAttribute('aria-expanded', 'false');
+    }
     isBottomSheetOpen = false;
 }
 
@@ -111,26 +163,26 @@ function applySidenavState() {
     const shouldBeCollapsed = isSidenavCollapsed;
 
     if (isMobile) {
-        sidebar.classList.toggle('open', shouldBeOpen);
-        sidebarScrim.classList.toggle('visible', shouldBeOpen);
-        menuToggleButton.setAttribute('aria-expanded', shouldBeOpen.toString());
-        sidebar.classList.remove('collapsed');
+        if (sidebar) sidebar.classList.toggle('open', shouldBeOpen);
+        if (sidebarScrim) sidebarScrim.classList.toggle('visible', shouldBeOpen);
+        if (menuToggleButton) menuToggleButton.setAttribute('aria-expanded', shouldBeOpen.toString());
+        if (sidebar) sidebar.classList.remove('collapsed');
         document.body.style.overflow = shouldBeOpen ? 'hidden' : '';
-        sidebar.style.transition = 'transform 0.3s ease';
+        if (sidebar) sidebar.style.transition = 'transform 0.3s ease';
     } else {
-        sidebar.classList.remove('open');
-        sidebar.classList.toggle('collapsed', shouldBeCollapsed);
-        sidebarScrim.classList.remove('visible');
-        menuToggleButton.setAttribute('aria-expanded', (!shouldBeCollapsed).toString());
+        if (sidebar) sidebar.classList.remove('open');
+        if (sidebar) sidebar.classList.toggle('collapsed', shouldBeCollapsed);
+        if (sidebarScrim) sidebarScrim.classList.remove('visible');
+        if (menuToggleButton) menuToggleButton.setAttribute('aria-expanded', (!shouldBeCollapsed).toString());
         document.body.style.overflow = '';
-        sidebar.style.transition = 'width 0.3s ease';
+        if (sidebar) sidebar.style.transition = 'width 0.3s ease';
     }
-    closeModelDropdown();
-    closeModelBottomSheet();
+     closeModelDropdown();
+     closeModelBottomSheet();
 }
 
 function openModelBottomSheet() {
-    if (!isMobile) return;
+    if (!isMobile || !modelBottomSheet || !bottomSheetScrim || !modeSwitcherButton) return;
     modelBottomSheet.classList.add('show');
     bottomSheetScrim.classList.add('visible');
     modeSwitcherButton.setAttribute('aria-expanded', 'true');
@@ -139,12 +191,12 @@ function openModelBottomSheet() {
     document.body.style.overflow = 'hidden';
 }
 
-function openModelDropdown() {
-    if (isMobile) return;
-    modelDropdownMenu?.classList.add('show');
-    modeSwitcherButton.classList.add('open');
-    modeSwitcherButton.setAttribute('aria-expanded', 'true');
-}
+ function openModelDropdown() {
+     if (isMobile || !modelDropdownMenu || !modeSwitcherButton) return;
+     modelDropdownMenu.classList.add('show');
+     modeSwitcherButton.classList.add('open');
+     modeSwitcherButton.setAttribute('aria-expanded', 'true');
+ }
 
 function handleResize() {
     const nowMobile = window.innerWidth <= 960;
@@ -153,24 +205,24 @@ function handleResize() {
         if (isMobile) {
             isSidenavOpen = false;
             isSidenavCollapsed = false;
-            sidebar.style.transition = 'transform 0.3s ease';
+            if (sidebar) sidebar.style.transition = 'transform 0.3s ease';
             closeModelDropdown();
         } else {
             isSidenavOpen = true;
             isSidenavCollapsed = true;
-            sidebar.style.transition = 'width 0.3s ease';
+            if (sidebar) sidebar.style.transition = 'width 0.3s ease';
             closeModelBottomSheet();
         }
         applySidenavState();
     }
-    closeModelDropdown();
-    closeModelBottomSheet();
+     closeModelDropdown();
+     closeModelBottomSheet();
 }
 
 
 // --- Fungsi UI: Pesan & Welcome Message ---
 function removeWelcomeMessage() {
-    const welcomeContainer = chatContentWrapper.querySelector('.welcome-message-container');
+    const welcomeContainer = chatContentWrapper?.querySelector('.welcome-message-container');
     if (welcomeContainer) {
         welcomeContainer.remove();
         isChatStarted = true;
@@ -178,6 +230,7 @@ function removeWelcomeMessage() {
 }
 
 function addWelcomeMessage() {
+    if (!chatContentWrapper) return;
     // Hanya tambahkan jika belum ada pesan lain DAN belum ada welcome message
     if (!chatContentWrapper.querySelector('.message-container') && !chatContentWrapper.querySelector('.welcome-message-container')) {
         const welcomeContainer = document.createElement('div');
@@ -205,6 +258,8 @@ function decodeHtmlEntities(text) {
 }
 
 function addMessage(text, sender, isError = false) {
+    if (!chatContentWrapper || !chatHistory) return;
+
     if (!isChatStarted && sender === 'user') {
         removeWelcomeMessage();
     }
@@ -212,57 +267,72 @@ function addMessage(text, sender, isError = false) {
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message-container', sender === 'user' ? 'user-query' : 'model-response');
 
-    const contentWrapper = document.createElement('div');
-    contentWrapper.classList.add('message-content-wrapper');
-
-    const textDiv = document.createElement('div');
-    textDiv.classList.add('message-text');
-
-    if (isError) {
-        textDiv.style.color = 'red';
-        textDiv.style.fontStyle = 'italic';
-        textDiv.textContent = text;
-    } else if (sender === 'ai') {
-        if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
-            try {
-                const rawHtml = marked.parse(text);
-                const cleanHtml = DOMPurify.sanitize(rawHtml);
-                textDiv.innerHTML = cleanHtml;
-            } catch (parseError) {
-                console.error("Markdown parsing/sanitizing error:", parseError);
-                textDiv.textContent = text;
-                textDiv.style.fontStyle = 'italic';
-                textDiv.title = "Could not render Markdown.";
-            }
-        } else {
-            console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
-            textDiv.textContent = text;
-        }
-    } else {
-        textDiv.textContent = text;
-    }
-
-    contentWrapper.appendChild(textDiv);
-
+    // --- Struktur Berbeda untuk AI ---
     if (sender === 'ai') {
-        const bubble = document.createElement('div'); bubble.classList.add('message-bubble');
-        const avatar = document.createElement('div'); avatar.classList.add('message-avatar');
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
 
-        // --- GANTI SVG AVATAR AI ---
+        // 1. Avatar AI
+        const avatar = document.createElement('div');
+        avatar.classList.add('message-avatar');
         const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58)" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48)"&gt;&lt;g mask="url(#__lottie_element_55_1)" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62)" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
-        // Decode HTML entities before setting innerHTML
         avatar.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
-        // --- AKHIR GANTI SVG ---
-
         bubble.appendChild(avatar);
 
-        const actions = document.createElement('div'); actions.classList.add('message-actions');
+        // 2. Tombol Titik Tiga (Khusus Mobile)
+        const moreButtonMobile = document.createElement('button');
+        moreButtonMobile.classList.add('icon-button', 'message-action-more-mobile');
+        moreButtonMobile.setAttribute('aria-label', 'More options');
+        moreButtonMobile.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
+        bubble.appendChild(moreButtonMobile);
+
+        // 3. Wrapper Konten (Teks & Actions Asli)
+        const contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('message-content-wrapper');
+
+        // 4. Teks Pesan
+        const textDiv = document.createElement('div');
+        textDiv.classList.add('message-text');
+        if (isError) {
+            textDiv.style.color = 'red';
+            textDiv.style.fontStyle = 'italic';
+            textDiv.textContent = text;
+        } else {
+            if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+                try {
+                    const rawHtml = marked.parse(text);
+                    const cleanHtml = DOMPurify.sanitize(rawHtml);
+                    textDiv.innerHTML = cleanHtml;
+                } catch (parseError) {
+                    console.error("Markdown parsing/sanitizing error:", parseError);
+                    textDiv.textContent = text;
+                    textDiv.style.fontStyle = 'italic';
+                    textDiv.title = "Could not render Markdown.";
+                }
+            } else {
+                console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
+                textDiv.textContent = text;
+            }
+        }
+        contentWrapper.appendChild(textDiv);
+
+        // 5. Actions Asli (untuk Desktop)
+        const actions = document.createElement('div');
+        actions.classList.add('message-actions');
         actions.innerHTML = `<button class="icon-button" aria-label="Like response"><span class="material-symbols-outlined">thumb_up</span></button><button class="icon-button" aria-label="Dislike response"><span class="material-symbols-outlined">thumb_down</span></button><button class="icon-button" aria-label="Share & export"><span class="material-symbols-outlined">share</span></button><button class="icon-button" aria-label="More options"><span class="material-symbols-outlined">more_vert</span></button>`;
         contentWrapper.appendChild(actions);
 
         bubble.appendChild(contentWrapper);
         messageContainer.appendChild(bubble);
+
     } else {
+        // --- Struktur untuk User Query (Tetap Sama) ---
+        const contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('message-content-wrapper');
+        const textDiv = document.createElement('div');
+        textDiv.classList.add('message-text');
+        textDiv.textContent = text;
+        contentWrapper.appendChild(textDiv);
         messageContainer.appendChild(contentWrapper);
     }
 
@@ -297,8 +367,8 @@ async function callGeminiAPI(prompt, history) {
         if (typeof data.text === 'string') {
             return data.text;
         } else {
-            console.error("Unexpected success response format from server:", data);
-            throw new Error("Received unexpected success response from server.");
+             console.error("Unexpected success response format from server:", data);
+             throw new Error("Received unexpected success response from server.");
         }
     } catch (error) {
         console.error('Failed to call Vercel Function:', error);
@@ -309,9 +379,11 @@ async function callGeminiAPI(prompt, history) {
 // --- Fungsi Reset Chat ---
 function resetChat() {
     console.log("Starting new chat...");
-    chatContentWrapper.innerHTML = ''; // Hapus pesan di UI
-    promptTextarea.value = '';
-    promptTextarea.dispatchEvent(new Event('input')); // Panggil setelah kosongkan
+    if (chatContentWrapper) chatContentWrapper.innerHTML = ''; // Hapus pesan di UI
+    if (promptTextarea) {
+        promptTextarea.value = '';
+        promptTextarea.dispatchEvent(new Event('input')); // Panggil setelah kosongkan
+    }
     currentChatHistory = []; // Reset history JS
     currentChatId = null; // Reset ID chat aktif
 
@@ -320,12 +392,14 @@ function resetChat() {
     if (isGenerating) {
         console.log("Resetting UI from generating state during chat reset.");
         isGenerating = false;
-        inputArea.classList.remove('is-sending');
-        promptTextarea.disabled = !isLoggedIn;
-        stopButton.disabled = true;
-        stopButton.style.display = 'none';
-        promptTextarea.dispatchEvent(new Event('input')); // Update tombol
-        if (isLoggedIn) promptTextarea.focus();
+        if (inputArea) inputArea.classList.remove('is-sending');
+        if (promptTextarea) promptTextarea.disabled = !isLoggedIn;
+        if (stopButton) {
+            stopButton.disabled = true;
+            stopButton.style.display = 'none';
+        }
+        if (promptTextarea) promptTextarea.dispatchEvent(new Event('input')); // Update tombol
+        if (isLoggedIn && promptTextarea) promptTextarea.focus();
     }
 
     if (isMobile && isSidenavOpen) {
@@ -387,21 +461,21 @@ function loadRecentChats(userId) {
     }
 
     const chatsQuery = db.collection('chats')
-        .where('userId', '==', userId)
-        .orderBy('lastUpdatedAt', 'desc')
-        .limit(20);
+                         .where('userId', '==', userId)
+                         .orderBy('lastUpdatedAt', 'desc')
+                         .limit(20);
 
     unsubscribeChatsListener = chatsQuery.onSnapshot(snapshot => {
         recentChatsList.innerHTML = ''; // Kosongkan list
         if (snapshot.empty) {
-            recentChatsList.innerHTML = '<li>No recent chats</li>';
-            return;
+          recentChatsList.innerHTML = '<li>No recent chats</li>';
+          return;
         }
         snapshot.forEach(doc => {
-            const chatData = doc.data();
-            const chatId = doc.id;
-            const listItem = createChatListItem(chatId, chatData.title);
-            recentChatsList.appendChild(listItem);
+          const chatData = doc.data();
+          const chatId = doc.id;
+          const listItem = createChatListItem(chatId, chatData.title);
+          recentChatsList.appendChild(listItem);
         });
         if (currentChatId) {
             highlightSidebarItem(currentChatId);
@@ -410,13 +484,13 @@ function loadRecentChats(userId) {
         console.error("Error getting recent chats:", error);
         recentChatsList.innerHTML = '<li>Error loading history</li>';
         if (error.code === 'permission-denied') {
-            recentChatsList.innerHTML = '<li>Error: Insufficient permissions to load history. Check Firestore rules.</li>';
+             recentChatsList.innerHTML = '<li>Error: Insufficient permissions to load history. Check Firestore rules.</li>';
         }
     });
 }
 
 async function loadChatDetails(chatId) {
-    if (!db || !chatId) return;
+    if (!db || !chatId || !chatContentWrapper) return;
     console.log(`Loading chat details for ${chatId}`);
     chatContentWrapper.innerHTML = '<div class="loading-spinner">Loading messages...</div>';
     currentChatHistory = [];
@@ -427,37 +501,37 @@ async function loadChatDetails(chatId) {
         const docSnap = await chatDocRef.get();
 
         if (docSnap.exists) {
-            const chatData = docSnap.data();
-            chatContentWrapper.innerHTML = '';
+          const chatData = docSnap.data();
+          chatContentWrapper.innerHTML = '';
 
-            if (chatData.messages && Array.isArray(chatData.messages)) {
-                chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
+          if (chatData.messages && Array.isArray(chatData.messages)) {
+            chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
 
-                chatData.messages.forEach(message => {
-                    addMessage(message.text, message.role);
-                });
-                currentChatHistory = chatData.messages.map(msg => ({
-                    role: msg.role,
-                    parts: [{ text: msg.text }]
-                }));
-                isChatStarted = true;
-            } else {
-                addWelcomeMessage();
-                currentChatHistory = [];
-            }
-            setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 50);
-        } else {
-            console.log("No such chat document!");
-            chatContentWrapper.innerHTML = '<div>Chat not found. Maybe it was deleted?</div>';
-            currentChatId = null;
+            chatData.messages.forEach(message => {
+              addMessage(message.text, message.role);
+            });
+            currentChatHistory = chatData.messages.map(msg => ({
+                role: msg.role,
+                parts: [{ text: msg.text }]
+            }));
+            isChatStarted = true;
+          } else {
+            addWelcomeMessage();
             currentChatHistory = [];
+          }
+          setTimeout(() => { if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight; }, 50);
+        } else {
+          console.log("No such chat document!");
+          chatContentWrapper.innerHTML = '<div>Chat not found. Maybe it was deleted?</div>';
+          currentChatId = null;
+          currentChatHistory = [];
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Error getting chat details:", error);
         chatContentWrapper.innerHTML = '<div>Error loading chat.</div>';
         currentChatId = null;
         currentChatHistory = [];
-    }
+      }
 }
 
 async function saveMessagesToFirestore(userMsgDb, aiMsgDb) {
@@ -501,7 +575,7 @@ async function saveMessagesToFirestore(userMsgDb, aiMsgDb) {
         console.error("Error saving messages to Firestore:", error);
         alert("Gagal menyimpan pesan. Silakan coba lagi.");
         if (!currentChatId && error) {
-            currentChatId = null;
+             currentChatId = null;
         }
     }
 }
@@ -583,11 +657,14 @@ if (auth) {
             [userProfileImgDesktop, userProfileImgMobile].forEach(img => { if (img) img.src = profilePicUrl; });
 
             addWelcomeMessage();
-            promptTextarea.disabled = false;
-            promptTextarea.placeholder = placeholderLoggedIn;
+            if (promptTextarea) {
+                promptTextarea.disabled = false;
+                promptTextarea.placeholder = placeholderLoggedIn;
+            }
             if (micButton) micButton.disabled = false;
 
             loadRecentChats(user.uid);
+            updateAuthPopupContent(); // Update konten popup jika sudah login
 
         } else {
             // User logout
@@ -600,10 +677,12 @@ if (auth) {
             [userProfileImgDesktop, userProfileImgMobile].forEach(img => { if (img) img.src = ""; });
 
             addWelcomeMessage();
-            promptTextarea.disabled = true;
-            promptTextarea.placeholder = placeholderLoggedOut;
+            if (promptTextarea) {
+                promptTextarea.disabled = true;
+                promptTextarea.placeholder = placeholderLoggedOut;
+            }
             if (micButton) micButton.disabled = true;
-            sendButton.disabled = true;
+            if (sendButton) sendButton.disabled = true;
             if (recentChatsList) recentChatsList.innerHTML = '<li>Login untuk melihat history</li>';
 
             resetChat();
@@ -613,150 +692,205 @@ if (auth) {
                 unsubscribeChatsListener = null;
                 console.log("Firestore listener stopped.");
             }
+            updateAuthPopupContent(); // Update konten popup jika sudah logout
+            // Tutup popup jika terbuka saat logout
+            if (isAuthPopupOpen) {
+                toggleAuthPopup();
+            }
         }
-        promptTextarea.dispatchEvent(new Event('input'));
+        // Panggil event input di akhir untuk memastikan state tombol benar
+        if (promptTextarea) promptTextarea.dispatchEvent(new Event('input'));
     });
 } else {
     console.error("Firebase Auth failed to initialize. Login functionality disabled.");
-    promptTextarea.disabled = true;
-    promptTextarea.placeholder = "Error: Fitur chat tidak tersedia.";
+    if (promptTextarea) {
+        promptTextarea.disabled = true;
+        promptTextarea.placeholder = "Error: Fitur chat tidak tersedia.";
+    }
     if (loginIconDesktop) loginIconDesktop.style.color = 'grey';
     if (loginIconMobile) loginIconMobile.style.color = 'grey';
+    updateAuthPopupContent(); // Tampilkan state logged out di popup
 }
 
 
 // --- Event Listeners ---
 // Sidebar & Scrim, Modal, Resize
-menuToggleButton.addEventListener('click', () => {
-    if (isMobile) { isSidenavOpen = !isSidenavOpen; }
-    else { isSidenavCollapsed = !isSidenavCollapsed; isSidenavOpen = true; }
-    applySidenavState();
-});
-sidebarScrim.addEventListener('click', () => { if (isMobile && isSidenavOpen) { isSidenavOpen = false; applySidenavState(); } });
-bottomSheetScrim.addEventListener('click', closeModelBottomSheet);
+if (menuToggleButton) {
+    menuToggleButton.addEventListener('click', () => {
+        if (isMobile) { isSidenavOpen = !isSidenavOpen; }
+        else { isSidenavCollapsed = !isSidenavCollapsed; isSidenavOpen = true; }
+        applySidenavState();
+    });
+}
+if (sidebarScrim) {
+    sidebarScrim.addEventListener('click', () => { if (isMobile && isSidenavOpen) { isSidenavOpen = false; applySidenavState(); } });
+}
+if (bottomSheetScrim) {
+    bottomSheetScrim.addEventListener('click', closeModelBottomSheet);
+}
 window.addEventListener('resize', handleResize);
 
 // Input Area Logic (Logika Tombol Mic/Send/Stop - REVISI)
-promptTextarea.addEventListener('input', () => {
-    // ... (kode resize textarea tetap sama) ...
-    promptTextarea.style.height = 'auto';
-    let scrollHeight = promptTextarea.scrollHeight;
-    const maxHeightStyle = getComputedStyle(promptTextarea).maxHeight;
-    const maxHeight = maxHeightStyle && maxHeightStyle !== 'none' ? parseInt(maxHeightStyle, 10) : 200;
-    promptTextarea.style.height = (scrollHeight > maxHeight ? maxHeight : scrollHeight) + 'px';
-    promptTextarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
+if (promptTextarea) {
+    promptTextarea.addEventListener('input', () => {
+        // ... (kode resize textarea tetap sama) ...
+        promptTextarea.style.height = 'auto';
+        let scrollHeight = promptTextarea.scrollHeight;
+        const maxHeightStyle = getComputedStyle(promptTextarea).maxHeight;
+        const maxHeight = maxHeightStyle && maxHeightStyle !== 'none' ? parseInt(maxHeightStyle, 10) : 200;
+        promptTextarea.style.height = (scrollHeight > maxHeight ? maxHeight : scrollHeight) + 'px';
+        promptTextarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
 
-    // Hanya update tombol jika user login
-    if (isLoggedIn) {
-        const hasText = promptTextarea.value.trim().length > 0;
+        // Hanya update tombol jika user login
+        if (isLoggedIn) {
+            const hasText = promptTextarea.value.trim().length > 0;
 
-        if (isGenerating) {
-            // Sedang generating: Tampilkan Stop, Sembunyikan Mic & Send
-            if (stopButton) {
-                stopButton.style.display = 'inline-flex';
-                stopButton.disabled = false;
+            if (isGenerating) {
+                // Sedang generating: Tampilkan Stop, Sembunyikan Mic & Send
+                if (stopButton) {
+                    stopButton.style.display = 'inline-flex';
+                    stopButton.disabled = false;
+                }
+                if (sendButton) sendButton.style.display = 'none';
+                if (micButton) micButton.style.display = 'none';
+            } else if (hasText) {
+                // Ada teks, tidak generating: Tampilkan Send, Sembunyikan Mic & Stop
+                if (sendButton) {
+                    sendButton.style.display = 'inline-flex';
+                    sendButton.disabled = false;
+                }
+                if (micButton) micButton.style.display = 'none';
+                if (stopButton) stopButton.style.display = 'none';
+            } else {
+                // Tidak ada teks, tidak generating: Tampilkan Mic, Sembunyikan Send & Stop
+                if (micButton) {
+                    micButton.style.display = 'inline-flex';
+                    micButton.disabled = false;
+                }
+                if (sendButton) sendButton.style.display = 'none';
+                if (stopButton) stopButton.style.display = 'none';
             }
-            if (sendButton) sendButton.style.display = 'none';
-            if (micButton) micButton.style.display = 'none';
-        } else if (hasText) {
-            // Ada teks, tidak generating: Tampilkan Send, Sembunyikan Mic & Stop
-            if (sendButton) {
-                sendButton.style.display = 'inline-flex';
-                sendButton.disabled = false;
-            }
-            if (micButton) micButton.style.display = 'none';
-            if (stopButton) stopButton.style.display = 'none';
         } else {
-            // Tidak ada teks, tidak generating: Tampilkan Mic, Sembunyikan Send & Stop
+            // Jika logout: Sembunyikan Send & Stop, tampilkan Mic (tapi disabled)
             if (micButton) {
                 micButton.style.display = 'inline-flex';
-                micButton.disabled = false;
+                micButton.disabled = true;
             }
             if (sendButton) sendButton.style.display = 'none';
             if (stopButton) stopButton.style.display = 'none';
         }
-    } else {
-        // Jika logout: Sembunyikan Send & Stop, tampilkan Mic (tapi disabled)
-        if (micButton) {
-            micButton.style.display = 'inline-flex';
-            micButton.disabled = true;
-        }
-        if (sendButton) sendButton.style.display = 'none';
-        if (stopButton) stopButton.style.display = 'none';
-    }
-});
+    });
+}
 
 
-// --- Event Listener Tombol Auth ---
+// --- Event Listener Tombol Auth Header (Untuk Buka/Tutup Popup) ---
 [authButtonDesktop, authButtonMobile].forEach(button => {
     if (button) {
-        button.addEventListener('click', () => {
-            if (isLoggedIn) {
-                if (confirm("Apakah Anda yakin ingin logout?")) { signOutUser(); }
-            } else { signInWithGoogle(); }
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // Hentikan event agar tidak ditangkap document listener
+            toggleAuthPopup();
         });
     }
 });
 
+// --- Event Listener Tombol di dalam Auth Popup ---
+if (popupSigninButton) {
+    popupSigninButton.addEventListener('click', () => {
+        signInWithGoogle();
+        toggleAuthPopup(); // Tutup popup setelah klik sign in
+    });
+}
+if (popupSignoutButton) {
+    popupSignoutButton.addEventListener('click', () => {
+        if (confirm("Apakah Anda yakin ingin logout?")) {
+            signOutUser();
+            // Popup akan tertutup otomatis oleh onAuthStateChanged
+        }
+    });
+}
+
+// --- Event Listener untuk Menutup Popup Saat Klik di Luar ---
+document.addEventListener('click', (event) => {
+    // Tutup dropdown model jika terbuka
+     const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
+                                  modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
+                                  !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
+                                  !modelDropdownMenu.contains(event.target);
+     if (isClickOutsideDropdown) { closeModelDropdown(); }
+
+     // Tutup popup auth jika terbuka dan klik di luar
+     if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
+         !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
+         !(authButtonMobile && authButtonMobile.contains(event.target))) {
+        toggleAuthPopup();
+     }
+ });
+
 
 // Tombol Send (Gunakan saveMessagesToFirestore - REVISI)
-sendButton.addEventListener('click', async () => {
-    if (!isLoggedIn || !currentUser) {
-        alert("Silakan login terlebih dahulu untuk mengirim pesan.");
-        signInWithGoogle();
-        return;
-    }
-
-    const messageText = promptTextarea.value.trim();
-    if (messageText && !isGenerating) {
-        addMessage(messageText, 'user');
-        const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
-        const userMessageForDb = { role: "user", text: messageText };
-
-        const historyForApi = [...currentChatHistory];
-
-        // Update UI State (Generating) -> Panggil event input untuk update tombol
-        isGenerating = true;
-        promptTextarea.value = ''; // Kosongkan setelah addMessage
-        promptTextarea.disabled = true;
-        promptTextarea.dispatchEvent(new Event('input')); // Update tombol ke state generating (tampilkan stop)
-
-        try {
-            const aiResponseText = await callGeminiAPI(messageText, historyForApi);
-            addMessage(aiResponseText, 'ai');
-            const aiMessageForHistory = { role: "model", parts: [{ text: aiResponseText }] };
-            const aiMessageForDb = { role: "model", text: aiResponseText };
-
-            await saveMessagesToFirestore(userMessageForDb, aiMessageForDb);
-
-            currentChatHistory.push(userMessageForHistory);
-            currentChatHistory.push(aiMessageForHistory);
-
-        } catch (error) {
-            addMessage(`Error: ${error.message}`, 'ai', true);
-        } finally {
-            // Kembalikan UI State -> Panggil event input untuk update tombol
-            isGenerating = false;
-            promptTextarea.disabled = false;
-            // Panggil event input SETELAH isGenerating false dan textarea aktif
-            promptTextarea.dispatchEvent(new Event('input'));
-            promptTextarea.focus();
+if (sendButton) {
+    sendButton.addEventListener('click', async () => {
+        if (!isLoggedIn || !currentUser) {
+            alert("Silakan login terlebih dahulu untuk mengirim pesan.");
+            signInWithGoogle();
+            return;
         }
-    }
-});
+
+        const messageText = promptTextarea.value.trim();
+        if (messageText && !isGenerating) {
+            addMessage(messageText, 'user');
+            const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
+            const userMessageForDb = { role: "user", text: messageText };
+
+            const historyForApi = [...currentChatHistory];
+
+            // Update UI State (Generating) -> Panggil event input untuk update tombol
+            isGenerating = true;
+            promptTextarea.value = ''; // Kosongkan setelah addMessage
+            promptTextarea.disabled = true;
+            promptTextarea.dispatchEvent(new Event('input')); // Update tombol ke state generating (tampilkan stop)
+
+            try {
+                const aiResponseText = await callGeminiAPI(messageText, historyForApi);
+                addMessage(aiResponseText, 'ai');
+                const aiMessageForHistory = { role: "model", parts: [{ text: aiResponseText }] };
+                const aiMessageForDb = { role: "model", text: aiResponseText };
+
+                await saveMessagesToFirestore(userMessageForDb, aiMessageForDb);
+
+                currentChatHistory.push(userMessageForHistory);
+                currentChatHistory.push(aiMessageForHistory);
+
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'ai', true);
+            } finally {
+                // Kembalikan UI State -> Panggil event input untuk update tombol
+                isGenerating = false;
+                promptTextarea.disabled = false;
+                // Panggil event input SETELAH isGenerating false dan textarea aktif
+                promptTextarea.dispatchEvent(new Event('input'));
+                promptTextarea.focus();
+            }
+        }
+    });
+}
 
 // Tombol Stop (Hanya Reset UI - REVISI)
-stopButton.addEventListener('click', () => {
-    console.log("Stop generation requested (UI only).");
-    if (isGenerating) {
-        isGenerating = false; // Set state generating ke false
-        promptTextarea.disabled = false; // Aktifkan textarea
-        // Panggil event input untuk mengembalikan tombol ke state non-generating (tampilkan mic)
-        promptTextarea.dispatchEvent(new Event('input'));
-        promptTextarea.focus();
-        addMessage("Generation stopped on client. Server process might have continued.", 'ai', true);
-    }
-});
+if (stopButton) {
+    stopButton.addEventListener('click', () => {
+        console.log("Stop generation requested (UI only).");
+        if (isGenerating) {
+            isGenerating = false; // Set state generating ke false
+            if (promptTextarea) {
+                promptTextarea.disabled = false; // Aktifkan textarea
+                // Panggil event input untuk mengembalikan tombol ke state non-generating (tampilkan mic)
+                promptTextarea.dispatchEvent(new Event('input'));
+                promptTextarea.focus();
+            }
+            addMessage("Generation stopped on client. Server process might have continued.", 'ai', true);
+        }
+    });
+}
 
 
 // Tombol New Chat
@@ -774,31 +908,28 @@ if (mobileNewChatButtonHeader) mobileNewChatButtonHeader.addEventListener('click
 
 
 // Kirim dengan Enter
-promptTextarea.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !sendButton.disabled && !isMobile && isLoggedIn) {
-        event.preventDefault();
-        sendButton.click();
-    }
-});
+if (promptTextarea) {
+    promptTextarea.addEventListener('keydown', (event) => {
+        // Pastikan sendButton ada dan tidak disabled sebelum trigger click
+        if (event.key === 'Enter' && !event.shiftKey && sendButton && !sendButton.disabled && !isMobile && isLoggedIn) {
+            event.preventDefault();
+            sendButton.click();
+        }
+    });
+}
 
 // Mode Switcher & Dropdown/Bottom Sheet Logic
 function handleModeSwitchClick(event) {
-    event.stopPropagation();
-    if (isMobile) {
-        isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
-    } else {
-        modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
-    }
-}
-modeSwitcherButton.addEventListener('click', handleModeSwitchClick);
+     event.stopPropagation();
+     if (isMobile) {
+         isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
+     } else {
+         modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
+     }
+ }
+if (modeSwitcherButton) modeSwitcherButton.addEventListener('click', handleModeSwitchClick);
 if (sidebarModeSwitcherButton) sidebarModeSwitcherButton.addEventListener('click', handleModeSwitchClick);
-document.addEventListener('click', (event) => {
-    const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
-        !modeSwitcherButton.contains(event.target) &&
-        !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
-        !modelDropdownMenu.contains(event.target);
-    if (isClickOutsideDropdown) { closeModelDropdown(); }
-});
+// document.addEventListener('click', ...) sudah dimodifikasi di atas
 function handleDropdownItemClick(item) {
     const value = item.dataset.value;
     const role = item.getAttribute('role');
@@ -814,7 +945,7 @@ function handleDropdownItemClick(item) {
             if (checkmark) checkmark.style.visibility = isSelected ? 'visible' : 'hidden';
         });
         // Update teks header
-        selectedModeText.textContent = value;
+        if (selectedModeText) selectedModeText.textContent = value;
         if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = value;
 
         // Update Model API
@@ -830,7 +961,7 @@ function handleDropdownItemClick(item) {
             console.log("API Model changed to:", currentModel);
             if (isLoggedIn) resetChat(); // Reset hanya jika user login
         } else {
-            console.log("Model already set to:", currentModel);
+             console.log("Model already set to:", currentModel);
         }
     } else if (value === 'Gemini Advanced') {
         console.log("Upgrade button clicked");
@@ -849,12 +980,12 @@ dropdownItemsMobile.forEach(item => item.addEventListener('click', () => handleD
 // --- Inisialisasi Akhir Saat Load ---
 applySidenavState();
 // State awal UI diatur oleh onAuthStateChanged
-isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
+isChatStarted = !chatContentWrapper?.querySelector('.welcome-message-container');
 // Inisialisasi model awal
 const initialSelectedItem = document.querySelector('.dropdown-item.selected[role="menuitemradio"]');
 if (initialSelectedItem) {
     const initialValue = initialSelectedItem.dataset.value;
-    selectedModeText.textContent = initialValue;
+    if (selectedModeText) selectedModeText.textContent = initialValue;
     if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = initialValue;
     let initialModel = 'gemini-2.0-flash';
     switch (initialValue) {
@@ -872,8 +1003,8 @@ if (initialSelectedItem) {
     // Cari item yang data-value-nya cocok dengan default model
     const defaultItem = document.querySelector(`.dropdown-item[data-value="2.0 Flash"]`); // Ganti "2.0 Flash" jika defaultnya beda
     const defaultText = defaultItem ? defaultItem.dataset.value : "2.0 Flash"; // Teks default
-    selectedModeText.textContent = defaultText;
-    if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
+    if (selectedModeText) selectedModeText.textContent = defaultText;
+     if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
 }
 
 // Pastikan tombol stop disembunyikan di awal
@@ -882,7 +1013,7 @@ if (stopButton) {
     stopButton.disabled = true;
 }
 // Panggil event input sekali di awal untuk set state tombol mic/send awal
-promptTextarea.dispatchEvent(new Event('input'));
+if (promptTextarea) promptTextarea.dispatchEvent(new Event('input'));
 
 
 console.log("Gemini Chat App Initialized (with Auth Compat). Waiting for Auth state...");
