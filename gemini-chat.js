@@ -81,6 +81,13 @@ const popupUserEmail = document.getElementById('popup-user-email');
 const popupSigninButton = document.getElementById('popup-signin-button');
 const popupSignoutButton = document.getElementById('popup-signout-button');
 
+const settingsMenuItem = document.getElementById('settings-menu-item');
+const settingsPopupMenu = document.getElementById('settings-popup-menu');
+const settingsDarkModeItem = document.getElementById('settings-dark-mode-item');
+const settingsDarkModeIcon = document.getElementById('settings-dark-mode-icon');
+const settingsDarkModeText = document.getElementById('settings-dark-mode-text');
+
+
 
 // --- Variabel State ---
 let isMobile = window.innerWidth <= 960;
@@ -91,6 +98,8 @@ let isGenerating = false;
 let isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
 let currentModel = 'gemini-2.0-flash';
 let currentChatHistory = [];
+
+let isSettingsPopupOpen = false;
 
 // --- Variabel State Auth & Firestore ---
 let currentUser = null;
@@ -119,13 +128,102 @@ function toggleAuthPopup() {
     if (!authPopupMenu) return;
 
     if (isAuthPopupOpen) {
-        authPopupMenu.classList.remove('show');
-        isAuthPopupOpen = false;
+        // Panggil fungsi close yang baru
+        closeAuthPopup();
     } else {
         updateAuthPopupContent();
         authPopupMenu.classList.add('show');
         isAuthPopupOpen = true;
     }
+}
+
+// <<< --- TAMBAHKAN FUNGSI INI --- >>>
+function closeAuthPopup() {
+    if (authPopupMenu) {
+        authPopupMenu.classList.remove('show');
+    }
+    isAuthPopupOpen = false;
+}
+
+// --- Fungsi Settings Popup ---
+function closeSettingsPopup() {
+    if (settingsPopupMenu) {
+        settingsPopupMenu.classList.remove('show');
+    }
+    isSettingsPopupOpen = false;
+}
+
+function openSettingsPopup() {
+    if (settingsPopupMenu && settingsMenuItem) {
+        // Posisikan popup relatif terhadap tombol settings
+        const rect = settingsMenuItem.getBoundingClientRect();
+        settingsPopupMenu.style.bottom = `${window.innerHeight - rect.top}px`; // Dari bawah viewport ke atas tombol
+        settingsPopupMenu.style.left = `${rect.left}px`; // Sejajar kiri tombol
+
+        settingsPopupMenu.classList.add('show');
+        isSettingsPopupOpen = true;
+    }
+}
+
+function toggleSettingsPopup(event) {
+    event.stopPropagation(); // Hentikan event agar tidak menutup popup langsung
+    if (isSettingsPopupOpen) {
+        closeSettingsPopup();
+    } else {
+        closeAuthPopup(); // Tutup popup lain jika terbuka
+        closeModelDropdown();
+        closeModelBottomSheet();
+        openSettingsPopup();
+    }
+}
+
+// --- Fungsi Dark Mode ---
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (settingsDarkModeIcon) settingsDarkModeIcon.textContent = 'light_mode'; // Update ikon di popup
+        if (settingsDarkModeText) settingsDarkModeText.textContent = 'Light theme'; // Update teks di popup
+        if (settingsDarkModeItem) settingsDarkModeItem.setAttribute('aria-checked', 'true'); // Update state ARIA
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (settingsDarkModeIcon) settingsDarkModeIcon.textContent = 'dark_mode'; // Update ikon di popup
+        if (settingsDarkModeText) settingsDarkModeText.textContent = 'Dark theme'; // Update teks di popup
+        if (settingsDarkModeItem) settingsDarkModeItem.setAttribute('aria-checked', 'false'); // Update state ARIA
+    }
+}
+
+function toggleTheme() {
+    const currentThemeIsDark = document.body.classList.contains('dark-mode');
+    const newTheme = currentThemeIsDark ? 'light' : 'dark'; // Tentukan tema baru
+    applyTheme(newTheme); // Terapkan tema baru
+    try {
+        localStorage.setItem('theme', newTheme); // Simpan preferensi
+        console.log('Theme preference saved:', newTheme);
+    } catch (e) {
+        console.warn('Could not save theme preference to localStorage:', e);
+    }
+}
+
+function loadThemePreference() {
+    let preferredTheme = 'light'; // Default ke light
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
+            preferredTheme = savedTheme;
+            console.log('Loaded theme preference from localStorage:', preferredTheme);
+        } else {
+            // Jika tidak ada preferensi tersimpan, cek preferensi sistem
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                preferredTheme = 'dark';
+                console.log('Using system preference (dark mode)');
+            } else {
+                 console.log('Using default theme (light mode)');
+            }
+        }
+    } catch (e) {
+        console.warn('Could not access localStorage or matchMedia, using default theme:', e);
+    }
+    applyTheme(preferredTheme); // Terapkan tema saat load
 }
 
 // --- Fungsi UI: Sidebar, Bottom Sheet, Dropdown, Resize ---
@@ -821,6 +919,43 @@ function highlightSidebarItem(chatId) {
     });
 }
 
+// Settings Menu Item
+if (settingsMenuItem) {
+    settingsMenuItem.addEventListener('click', toggleSettingsPopup);
+}
+
+// Dark Mode Item inside Settings Popup
+if (settingsDarkModeItem) {
+    settingsDarkModeItem.addEventListener('click', () => {
+        toggleTheme(); // Panggil fungsi toggle tema yang sudah ada
+        // closeSettingsPopup(); // Tutup popup setelah memilih (opsional)
+    });
+}
+
+// --- Event Listener untuk Menutup Popup Saat Klik di Luar ---
+document.addEventListener('click', (event) => {
+    const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
+                                 modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
+                                 !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
+                                 !modelDropdownMenu.contains(event.target);
+    if (isClickOutsideDropdown) { closeModelDropdown(); }
+
+    // Tutup Auth Popup
+    if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
+        !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
+        !(authButtonMobile && authButtonMobile.contains(event.target))) {
+       toggleAuthPopup(); // Gunakan toggle agar state isAuthPopupOpen terupdate
+    }
+
+    // <<< TAMBAHKAN INI: Tutup Settings Popup >>>
+    if (isSettingsPopupOpen && settingsPopupMenu && !settingsPopupMenu.contains(event.target) &&
+        !(settingsMenuItem && settingsMenuItem.contains(event.target))) {
+       closeSettingsPopup();
+    }
+    // <<< AKHIR TAMBAHAN >>>
+});
+
+
 
 // --- Listener Status Autentikasi ---
 if (auth) {
@@ -1196,3 +1331,5 @@ if (promptTextarea) promptTextarea.dispatchEvent(new Event('input'));
 
 
 console.log("Gemini Chat App Initialized (with Auth Compat). Waiting for Auth state...");
+loadThemePreference();
+applySidenavState();

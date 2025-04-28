@@ -55,6 +55,298 @@
             --bottom-area-height: calc(var(--input-area-min-height) + 16px + 16px + 16px);
         }
 
+        /* --- DARK MODE STYLES --- */
+        body.dark-mode {
+            /* Warna Dasar Gelap */
+            --gem-sys-color--surface: #1f1f1f;
+            /* Latar utama gelap */
+            --gem-sys-color--surface-container: #2a2a2e;
+            /* Kontainer sedikit lebih terang */
+            --gem-sys-color--surface-container-high: #35363a;
+            /* Kontainer lebih terang lagi (hover, dll) */
+            --gem-sys-color--surface-container-highest: #3f4043;
+            /* Paling terang (hover aktif, dll) */
+            --gem-sys-color--on-surface: #e3e3e3;
+            /* Teks utama terang */
+            --gem-sys-color--on-surface-variant: #bdc1c6;
+            /* Teks/ikon sekunder abu-abu terang */
+            --gem-sys-color--primary: #8ab4f8;
+            /* Link biru terang */
+            --gem-sys-color--on-primary: #062e6f;
+            /* Teks gelap di atas biru terang (jika ada) */
+            --gem-sys-color--primary-container: #0842a0;
+            /* Latar item aktif sidebar (biru gelap) */
+            --gem-sys-color--on-primary-container: #d3e3fd;
+            /* Teks/ikon item aktif sidebar (biru muda) */
+            --gem-sys-color--outline: #5f6368;
+            /* Garis/border abu-abu lebih terang */
+            --gem-sys-color--outline-variant: #444746;
+            /* Garis/border varian (lebih gelap) */
+            --gem-sys-color--inverse-surface: #35363a;
+            /* Latar bubble user (gelap) */
+            --gem-sys-color--on-inverse-surface: #e3e3e3;
+            /* Teks bubble user (terang) */
+            --gem-sys-color--scrim: rgba(0, 0, 0, 0.5);
+            /* Scrim bisa tetap gelap atau sedikit lebih terang */
+
+            /* Warna Lainnya Gelap */
+            --bard-color-form-field-placeholder: var(--gem-sys-color--on-surface-variant);
+            --bard-color-input-area-buttons-hover-background: rgba(232, 234, 237, 0.08);
+            /* Hover terang transparan */
+
+            /* Penyesuaian Spesifik Dark Mode (jika perlu) */
+            --gem-icon-bg-color-1: #2e3a31;
+            /* Contoh: Hijau gelap */
+            --gem-icon-bg-color-2: #4d3c32;
+            /* Contoh: Oranye gelap */
+            --gem-icon-bg-color-3: #283e4a;
+            /* Contoh: Biru gelap */
+            --gem-icon-bg-color-4: #40324a;
+            /* Contoh: Ungu gelap */
+            --gem-icon-bg-color-5: #4d3230;
+            /* Contoh: Merah gelap */
+
+            /* Background input area */
+            --input-area-bg: #2a2a2e;
+            /* Samakan dengan surface-container */
+            --input-area-border: var(--gem-sys-color--outline);
+            /* Gunakan outline gelap */
+
+            /* Background dropdown/bottom sheet */
+            --dropdown-bg: #2a2a2e;
+            --dropdown-hover-bg: #35363a;
+
+            /* Background popup auth */
+            --auth-popup-bg: #35363a;
+
+            /* Warna scrollbar (opsional, mungkin tidak semua browser mendukung) */
+            scrollbar-color: var(--gem-sys-color--outline) var(--gem-sys-color--surface-container);
+        }
+
+        /* Penyesuaian elemen spesifik untuk dark mode */
+        body.dark-mode .input-area {
+            background-color: var(--input-area-bg);
+            border-color: var(--input-area-border);
+        }
+
+        body.dark-mode .input-area:focus-within {
+            border-color: var(--gem-sys-color--primary);
+            /* Highlight biru terang saat fokus */
+        }
+
+        body.dark-mode .input-area textarea {
+            color: var(--gem-sys-color--on-surface);
+            /* Pastikan teks input terang */
+        }
+
+        body.dark-mode .input-area textarea::placeholder {
+            color: var(--bard-color-form-field-placeholder);
+        }
+
+        body.dark-mode .input-area .send-button:not(:disabled) {
+            background-color: var(--gem-sys-color--primary-container);
+            color: var(--gem-sys-color--on-primary-container);
+        }
+
+        body.dark-mode .input-area .send-button:not(:disabled):hover {
+            filter: brightness(1.2);
+            /* Sedikit lebih terang saat hover */
+        }
+
+        body.dark-mode .input-area.is-sending .stop-button {
+            background-color: var(--gem-sys-color--primary-container);
+            color: var(--gem-sys-color--on-primary-container);
+        }
+
+        body.dark-mode .input-area.is-sending .stop-button:hover {
+            filter: brightness(1.2);
+        }
+
+        body.dark-mode .mode-switcher {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .mode-switcher:hover {
+            background-color: var(--gem-sys-color--surface-container-highest);
+        }
+
+        body.dark-mode .model-dropdown,
+        body.dark-mode .model-bottom-sheet {
+            background-color: var(--dropdown-bg);
+        }
+
+        body.dark-mode .dropdown-item:hover {
+            background-color: var(--dropdown-hover-bg);
+        }
+
+        body.dark-mode .upgrade-button {
+            background-color: var(--gem-sys-color--surface-container-highest);
+            color: var(--gem-sys-color--primary);
+        }
+
+        body.dark-mode .upgrade-button:hover {
+            filter: brightness(1.1);
+        }
+
+        body.dark-mode .auth-popup {
+            background-color: var(--auth-popup-bg);
+            border-color: var(--gem-sys-color--outline);
+        }
+
+        body.dark-mode .popup-button {
+            border-color: var(--gem-sys-color--outline);
+            color: var(--gem-sys-color--primary);
+        }
+
+        body.dark-mode .popup-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+        }
+
+        body.dark-mode .new-chat-button {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .new-chat-button:hover {
+            background-color: var(--gem-sys-color--surface-container-highest);
+        }
+
+        body.dark-mode .upsell-button button {
+            background-color: var(--gem-sys-color--surface-container-highest);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .upsell-button button:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+        }
+
+        /* Warna scrollbar gelap */
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background-color: var(--gem-sys-color--outline);
+        }
+
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Penyesuaian warna ikon Gem */
+        body.dark-mode .gem-icon-container .material-symbols-outlined {
+            color: var(--gem-sys-color--on-surface);
+            /* Atau warna lain yang kontras */
+        }
+
+        body.dark-mode .gem-chess-bg {
+            background-color: #283e4a;
+        }
+
+        body.dark-mode .gem-brainstormer-bg {
+            background-color: #4d3c32;
+        }
+
+        body.dark-mode .gem-career-bg {
+            background-color: #4d3230;
+        }
+
+        /* Pastikan teks lokasi terbaca */
+        body.dark-mode .location-footer {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .location-footer a {
+            color: var(--gem-sys-color--primary);
+        }
+
+        /* Pastikan teks disclaimer terbaca */
+        body.dark-mode .disclaimer {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .disclaimer a {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .disclaimer a:hover {
+            color: var(--gem-sys-color--primary);
+        }
+
+        /* Warna teks welcome message */
+        body.dark-mode .welcome-message-container h1 {
+            background: linear-gradient(to right, #8ab4f8, #f28b82);
+            /* Gradient terang */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Warna teks bubble user */
+        body.dark-mode .user-query .message-text {
+            background-color: var(--gem-sys-color--inverse-surface);
+            color: var(--gem-sys-color--on-inverse-surface);
+        }
+
+        /* Warna teks bubble AI */
+        body.dark-mode .model-response .message-text {
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .model-response .message-text code:not(pre code) {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .model-response .message-text pre {
+            background-color: #202124;
+            /* Warna gelap standar untuk blok kode */
+            color: #e3e3e3;
+        }
+
+        body.dark-mode .model-response .message-text blockquote {
+            border-left-color: #5f6368;
+            color: #bdc1c6;
+        }
+
+        body.dark-mode .model-response .message-text a {
+            color: var(--gem-sys-color--primary);
+        }
+
+        /* Warna ikon di sidebar footer */
+        body.dark-mode .sidebar-footer .sidebar-item .item-icon {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .sidebar-footer .sidebar-item:hover .item-icon {
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        /* Warna ikon di recent chat */
+        body.dark-mode .conversation-item-container .conversation-icon {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .conversation-item-container:hover .conversation-icon,
+        body.dark-mode .conversation-item-container.active-item .conversation-icon {
+            color: var(--gem-sys-color--on-primary-container);
+            /* Atau on-surface jika hover biasa */
+        }
+
+        body.dark-mode .conversation-item-container.active-item .conversation-icon {
+            color: var(--gem-sys-color--on-primary-container);
+        }
+
+        /* Warna ikon delete chat */
+        body.dark-mode .conversation-actions .icon-button {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        body.dark-mode .conversation-item-container:hover .conversation-actions .icon-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            /* Hover lebih terang */
+        }
+
+        /* --- AKHIR DARK MODE STYLES --- */
+
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -1448,6 +1740,85 @@
             display: block;
         }
 
+        /* --- Settings Popup --- */
+        .settings-popup {
+            display: none;
+            /* Sembunyikan default */
+            position: absolute;
+            bottom: calc(var(--location-footer-height) + 8px);
+            /* Posisikan di atas footer */
+            left: 12px;
+            /* Sesuaikan jarak dari kiri */
+            background-color: var(--gem-sys-color--surface-container-high);
+            /* Warna background */
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            z-index: 1003;
+            /* Pastikan di atas elemen lain */
+            min-width: 200px;
+            /* Lebar minimum */
+            border: 1px solid var(--gem-sys-color--outline-variant);
+            overflow: hidden;
+            /* Agar border-radius bekerja */
+        }
+
+        .settings-popup.show {
+            display: block;
+            /* Tampilkan saat aktif */
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            /* Padding item */
+            cursor: pointer;
+            gap: 16px;
+            /* Jarak ikon dan teks */
+            transition: background-color 0.2s ease;
+            color: var(--gem-sys-color--on-surface);
+            /* Warna teks */
+        }
+
+        .settings-item:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+            /* Warna hover */
+        }
+
+        .settings-item .item-icon {
+            font-size: 20px;
+            color: var(--gem-sys-color--on-surface-variant);
+            /* Warna ikon */
+            flex-shrink: 0;
+        }
+
+        .settings-item .item-text {
+            font-size: 14px;
+            flex-grow: 1;
+        }
+
+        /* Style Dark Mode untuk Popup Settings */
+        body.dark-mode .settings-popup {
+            background-color: var(--auth-popup-bg);
+            /* Gunakan warna popup auth */
+            border-color: var(--gem-sys-color--outline);
+        }
+
+        body.dark-mode .settings-item {
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        body.dark-mode .settings-item:hover {
+            background-color: var(--dropdown-hover-bg);
+            /* Gunakan warna hover dropdown */
+        }
+
+        body.dark-mode .settings-item .item-icon {
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+
         /* Kontrol tampilan logged-in vs logged-out */
         .auth-popup .popup-logged-in,
         .auth-popup .popup-logged-out {
@@ -1948,8 +2319,10 @@
                             class="item-text">Help</span> </li>
                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">history</span> <span
                             class="item-text">Activity</span> </li>
-                    <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">settings</span> <span
-                            class="item-text">Settings</span> </li>
+                    <li class="sidebar-item" id="settings-menu-item"> <!-- <<< TAMBAHKAN ID DI SINI -->
+                        <span class="material-symbols-outlined item-icon">settings</span>
+                        <span class="item-text">Settings</span>
+                    </li>
                 </ul>
                 <div class="location-footer">
                     <span class="material-symbols-outlined icon-filled">fiber_manual_record</span>
@@ -1958,6 +2331,24 @@
                 </div>
             </div>
         </aside>
+
+        </aside> <!-- Penutup Sidebar -->
+
+        <!-- POPUP MENU SETTINGS BARU -->
+        <div id="settings-popup-menu" class="settings-popup" role="menu">
+            <div class="settings-item" id="settings-dark-mode-item" role="menuitemcheckbox" aria-checked="false">
+                <span class="material-symbols-outlined item-icon" id="settings-dark-mode-icon">dark_mode</span>
+                <span class="item-text" id="settings-dark-mode-text">Dark theme</span>
+                <!-- Optional: Tambahkan switch visual jika mau -->
+                <!-- <div class="switch-visual"></div> -->
+            </div>
+            <!-- Tambahkan item settings lain di sini jika perlu -->
+            <!-- <div class="settings-item" role="menuitem">
+            <span class="material-symbols-outlined item-icon">info</span>
+            <span class="item-text">About</span>
+        </div> -->
+        </div>
+        <!-- AKHIR POPUP MENU SETTINGS BARU -->
 
         <main class="chat-area" id="chat-area">
             <header class="chat-header">
@@ -2094,7 +2485,8 @@
                             <button class="icon-button upload-button" aria-label="Upload file"> <span
                                     class="material-symbols-outlined">add</span> </button>
                             <button class="text-button deep-research-button" aria-label="Deep Research"> <span
-                                    class="material-symbols-outlined">travel_explore</span> <span>Deep Research</span>
+                                    class="material-symbols-outlined">travel_explore</span> <span>Deep
+                                    Research</span>
                             </button>
                             <button class="text-button canvas-button" aria-label="Open Canvas"> <span
                                     class="material-symbols-outlined">edit_note</span> <span>Canvas</span> </button>
