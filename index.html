@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -778,8 +779,7 @@
             flex-shrink: 0;
         }
 
-        .dropdown-item:not(.item-gemini-advanced) .item-icon:empty {
-        }
+        .dropdown-item:not(.item-gemini-advanced) .item-icon:empty {}
 
         .dropdown-item.item-gemini-advanced .item-icon img {
             max-width: 100%;
@@ -1511,6 +1511,104 @@
             background-color: var(--bard-color-input-area-buttons-hover-background);
         }
 
+        /* --- ANIMASI LOADING AI --- */
+        .ai-loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            /* Jarak antara animasi dan teks */
+            padding: 10px 0;
+            /* Sesuaikan padding vertikal, horizontal 0 karena sudah ada di bubble */
+            min-height: 40px;
+            /* Tinggi minimum agar sejajar */
+        }
+
+        .ai-loading-animation-container {
+            position: relative;
+            width: 30px;
+            /* Ukuran container animasi */
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .ai-loading-loader {
+            position: absolute;
+            width: 30px;
+            /* Ukuran loader */
+            height: 30px;
+            border: 2px solid transparent;
+            /* Border loader */
+            border-left-color: #1981fd;
+            border-bottom-color: #1981fd;
+            border-right-color: #1981fd;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            /* Animasi putaran loader */
+            z-index: 1;
+        }
+
+        .ai-loading-svg {
+            width: 70%;
+            /* Ukuran SVG di dalam container */
+            height: 70%;
+            /* Animasi SVG utama */
+            animation: rotateShrinkPauseGrow 9.2s linear infinite;
+            transform-origin: center center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ai-loading-text {
+            font-size: 15px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        /* Keyframes untuk animasi putaran loader */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Keyframes untuk animasi utama SVG (disesuaikan untuk skala 0.7) */
+        @keyframes rotateShrinkPauseGrow {
+
+            /* 0% - 6.52% (0.6 detik): Putar 360deg, Kecilkan ke 70% */
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            6.52% {
+                transform: scale(0.7) rotate(360deg);
+            }
+
+            /* 6.52% - 71.74% (6 detik jeda): Tetap kecil (70%) */
+            71.74% {
+                transform: scale(0.7) rotate(360deg);
+            }
+
+            /* 71.74% - 78.26% (0.6 detik): Putar 360deg lagi (total 720deg), Kembali ke ukuran asli */
+            78.26% {
+                transform: scale(1) rotate(720deg);
+            }
+
+            /* 78.26% - 100% (2 detik jeda): Tetap ukuran asli */
+            100% {
+                transform: scale(1) rotate(720deg);
+            }
+        }
+
+        /* --- AKHIR ANIMASI LOADING AI --- */
+
+
         /* --- Responsiveness (MOBILE OVERRIDES) --- */
         @media screen and (max-width: 960px) {
             :root {
@@ -1947,7 +2045,8 @@
                     </button>
                     <button class="profile-button desktop-only" id="auth-button-desktop" aria-label="Account">
                         <img id="user-profile-img-desktop" class="user-logged-in" src="" alt="User Profile">
-                        <span id="login-icon-desktop" class="material-symbols-outlined user-logged-out">account_circle</span>
+                        <span id="login-icon-desktop"
+                            class="material-symbols-outlined user-logged-out">account_circle</span>
                     </button>
                     <button class="icon-button mobile-only" id="mobile-new-chat-button-header" aria-label="New chat">
                         <span class="material-symbols-outlined">add</span>
@@ -1957,7 +2056,8 @@
                     </button>
                     <button class="profile-button mobile-only" id="auth-button-mobile" aria-label="Account">
                         <img id="user-profile-img-mobile" class="user-logged-in" src="" alt="User Profile">
-                        <span id="login-icon-mobile" class="material-symbols-outlined user-logged-out">account_circle</span>
+                        <span id="login-icon-mobile"
+                            class="material-symbols-outlined user-logged-out">account_circle</span>
                     </button>
                 </div>
             </header>
@@ -2079,4 +2179,5 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
     <script src="gemini-chat.js" defer></script>
 </body>
+
 </html>

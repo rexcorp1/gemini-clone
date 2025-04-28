@@ -10,6 +10,13 @@ const firebaseConfig = {
     measurementId: "G-1Q6LGMHY7P"
   };
 
+  // --- Variabel State ---
+// ... (variabel state lainnya) ...
+// let currentLoadingMessageElement = null; // <<< GANTI NAMA VARIABEL INI
+let currentLoadingBubbleElement = null; // Untuk menyimpan elemen bubble AI yang sedang loading
+let currentAbortController = null; // Untuk membatalkan fetch
+
+
 // Initialize Firebase (Gunakan sintaks v8/compat)
 let app, auth, db;
 try {
@@ -249,7 +256,8 @@ function decodeHtmlEntities(text) {
     return textarea.value;
 }
 
-function addMessage(text, sender, isError = false) {
+// --- MODIFIED addMessage Function ---
+function addMessage(content, sender, options = {}) {
     if (!chatContentWrapper || !chatHistory) return;
 
     if (!isChatStarted && sender === 'user') {
@@ -259,84 +267,242 @@ function addMessage(text, sender, isError = false) {
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message-container', sender === 'user' ? 'user-query' : 'model-response');
 
-    // --- Struktur Berbeda untuk AI ---
+    const bubble = document.createElement('div');
+    bubble.classList.add('message-bubble');
+
     if (sender === 'ai') {
-        const bubble = document.createElement('div');
-        bubble.classList.add('message-bubble');
+        // 1. Avatar Area (akan diisi animasi atau ikon statis)
+        const avatarArea = document.createElement('div'); // Gunakan div terpisah untuk avatar/animasi
+        avatarArea.classList.add('message-avatar'); // Gunakan class avatar yang sudah ada
+        // avatarArea.style.marginTop = '3px'; // Sesuaikan margin jika perlu
 
-        // 1. Avatar AI
-        const avatar = document.createElement('div');
-        avatar.classList.add('message-avatar');
-        const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58)" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48)"&gt;&lt;g mask="url(#__lottie_element_55_1)" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62)" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
-        avatar.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
-        bubble.appendChild(avatar);
+        // 2. Wrapper Konten (teks pesan dan actions)
+        const contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('message-content-wrapper');
 
-        // 2. Tombol Titik Tiga (Khusus Mobile)
+        if (options.isLoading) {
+            // --- Add Loading Indicator KE DALAM avatarArea ---
+            const uniqueGradientId = `ai-loading-gradient-${Date.now()}`;
+            avatarArea.innerHTML = `
+                <div class="ai-loading-animation-container" style="width: 100%; height: 100%;">
+                    <div class="ai-loading-loader"></div>
+                    <svg class="ai-loading-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="${uniqueGradientId}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.223" y1="8.49" x2="10.462" y2="-8.212">
+                                <stop offset="0%" stop-color="rgb(33,123,254)"></stop>
+                                <stop offset="14%" stop-color="rgb(20,133,252)"></stop>
+                                <stop offset="27%" stop-color="rgb(7,142,251)"></stop>
+                                <stop offset="52%" stop-color="rgb(84,143,253)"></stop>
+                                <stop offset="78%" stop-color="rgb(161,144,255)"></stop>
+                                <stop offset="89%" stop-color="rgb(175,148,254)"></stop>
+                                <stop offset="100%" stop-color="rgb(189,153,254)"></stop>
+                            </linearGradient>
+                        </defs>
+                        <g transform="matrix(-1,0,0,-1,16,16)">
+                            <path fill="url(#${uniqueGradientId})" d=" M0.027,14 C0.48,6.49 6.49,0.48 14,0.027 C14,0.027 14,-0.027 14,-0.027 C6.49,-0.48 0.48,-6.49 0.027,-14 C0.027,-14 -0.027,-14 -0.027,-14 C-0.48,-6.49 -6.49,-0.48 -14,-0.027 C-14,-0.027 -14,0.027 -14,0.027 C-6.49,0.48 -0.48,6.49 -0.027,14 C-0.027,14 0.027,14 0.027,14z"></path>
+                        </g>
+                    </svg>
+                </div>
+            `;
+            bubble.appendChild(avatarArea); // Tambahkan area avatar (dengan animasi) ke bubble
+
+            // Tambahkan teks "Just a sec..." ke contentWrapper
+            const loadingText = document.createElement('span');
+            loadingText.classList.add('ai-loading-text');
+            loadingText.textContent = 'Just a sec...';
+            loadingText.style.padding = '10px 0'; // Beri padding agar sejajar
+            contentWrapper.appendChild(loadingText);
+
+            bubble.appendChild(contentWrapper); // Tambahkan contentWrapper ke bubble
+
+            // Simpan elemen BUBBLE untuk diupdate nanti
+            currentLoadingBubbleElement = bubble; // SIMPAN BUBBLE
+            // --- End Loading Indicator ---
+
+        } else {
+             // --- Add Final AI Message Content (Avatar + Text + Actions) ---
+             // Ini digunakan saat memuat dari history atau sebagai fallback
+            const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48_${Date.now()}"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55_${Date.now()}"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58_${Date.now()})" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1_${Date.now()}" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55_${Date.now()}"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48_${Date.now()})"&gt;&lt;g mask="url(#__lottie_element_55_1_${Date.now()})" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62_${Date.now()})" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
+            avatarArea.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
+            bubble.appendChild(avatarArea); // Tambahkan area avatar (dengan ikon statis) ke bubble
+
+            const textDiv = document.createElement('div');
+            textDiv.classList.add('message-text');
+            if (options.isError) {
+                textDiv.style.color = 'red';
+                textDiv.style.fontStyle = 'italic';
+                textDiv.textContent = content; // content adalah teks error
+            } else {
+                // Terapkan Markdown dan DOMPurify
+                if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+                    try {
+                        const rawHtml = marked.parse(content); // content adalah teks respons AI
+                        const cleanHtml = DOMPurify.sanitize(rawHtml);
+                        textDiv.innerHTML = cleanHtml;
+                    } catch (parseError) {
+                        console.error("Markdown parsing/sanitizing error:", parseError);
+                        textDiv.textContent = content;
+                        textDiv.style.fontStyle = 'italic';
+                        textDiv.title = "Could not render Markdown.";
+                    }
+                } else {
+                    console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
+                    textDiv.textContent = content;
+                }
+            }
+            contentWrapper.appendChild(textDiv);
+
+            // Tambahkan actions hanya jika bukan error
+            if (!options.isError) {
+                const actions = document.createElement('div');
+                actions.classList.add('message-actions');
+                actions.innerHTML = `<button class="icon-button" aria-label="Like response"><span class="material-symbols-outlined">thumb_up</span></button><button class="icon-button" aria-label="Dislike response"><span class="material-symbols-outlined">thumb_down</span></button><button class="icon-button" aria-label="Share & export"><span class="material-symbols-outlined">share</span></button><button class="icon-button" aria-label="More options"><span class="material-symbols-outlined">more_vert</span></button>`;
+                contentWrapper.appendChild(actions);
+            }
+
+            bubble.appendChild(contentWrapper); // Tambahkan contentWrapper ke bubble
+        }
+
+        // 3. Tombol Titik Tiga (Khusus Mobile) - Tambahkan di luar contentWrapper
         const moreButtonMobile = document.createElement('button');
         moreButtonMobile.classList.add('icon-button', 'message-action-more-mobile');
         moreButtonMobile.setAttribute('aria-label', 'More options');
         moreButtonMobile.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
-        bubble.appendChild(moreButtonMobile);
+        bubble.appendChild(moreButtonMobile); // Tambahkan tombol more mobile ke bubble
 
-        // 3. Wrapper Konten
-        const contentWrapper = document.createElement('div');
-        contentWrapper.classList.add('message-content-wrapper');
-
-        // 4. Teks Pesan
-        const textDiv = document.createElement('div');
-        textDiv.classList.add('message-text');
-        if (isError) {
-            textDiv.style.color = 'red';
-            textDiv.style.fontStyle = 'italic';
-            textDiv.textContent = text;
-        } else {
-            if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
-                try {
-                    const rawHtml = marked.parse(text);
-                    const cleanHtml = DOMPurify.sanitize(rawHtml);
-                    textDiv.innerHTML = cleanHtml;
-                } catch (parseError) {
-                    console.error("Markdown parsing/sanitizing error:", parseError);
-                    textDiv.textContent = text;
-                    textDiv.style.fontStyle = 'italic';
-                    textDiv.title = "Could not render Markdown.";
-                }
-            } else {
-                console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
-                textDiv.textContent = text;
-            }
-        }
-        contentWrapper.appendChild(textDiv);
-
-        // 5. Actions Asli (untuk Desktop)
-        const actions = document.createElement('div');
-        actions.classList.add('message-actions');
-        actions.innerHTML = `<button class="icon-button" aria-label="Like response"><span class="material-symbols-outlined">thumb_up</span></button><button class="icon-button" aria-label="Dislike response"><span class="material-symbols-outlined">thumb_down</span></button><button class="icon-button" aria-label="Share & export"><span class="material-symbols-outlined">share</span></button><button class="icon-button" aria-label="More options"><span class="material-symbols-outlined">more_vert</span></button>`;
-        contentWrapper.appendChild(actions);
-
-        bubble.appendChild(contentWrapper);
-        messageContainer.appendChild(bubble);
+        messageContainer.appendChild(bubble); // Tambahkan bubble ke container
 
     } else {
         // --- Struktur untuk User Query (Tetap Sama) ---
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content-wrapper');
         const textDiv = document.createElement('div');
         textDiv.classList.add('message-text');
-        textDiv.textContent = text;
+        textDiv.textContent = content; // content adalah teks user
         contentWrapper.appendChild(textDiv);
-        messageContainer.appendChild(contentWrapper);
+        bubble.appendChild(contentWrapper);
+        messageContainer.appendChild(bubble);
     }
 
     chatContentWrapper.appendChild(messageContainer);
     setTimeout(() => {
-        chatHistory.scrollTop = chatHistory.scrollHeight;
+        if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
     }, 50);
 }
 
+// --- MODIFIED Function untuk Mengupdate Pesan Loading ---
+function updateLoadingMessage(newContent, isError = false) {
+    const bubbleElement = currentLoadingBubbleElement; // Gunakan variabel yang menyimpan bubble
+
+    if (!bubbleElement) {
+        console.warn("Attempted to update loading message, but no bubble element found.");
+        // Jika tidak ada elemen loading, tambahkan saja sebagai pesan baru (fallback)
+        addMessage(newContent, 'ai', { isError: isError });
+        return;
+    }
+
+    // 1. Hapus indikator loading (animasi dan teks "Just a sec...")
+    const loadingIndicator = bubbleElement.querySelector('.ai-loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.remove();
+    }
+    const loadingText = bubbleElement.querySelector('.ai-loading-text');
+     if (loadingText) {
+         loadingText.remove();
+     }
+
+
+    // 2. Cari atau buat content wrapper
+    let contentWrapper = bubbleElement.querySelector('.message-content-wrapper');
+    if (!contentWrapper) {
+        console.warn("Could not find content wrapper in loading bubble. Creating a new one.");
+        contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('message-content-wrapper');
+        // Temukan elemen setelah avatar area (jika ada) atau tambahkan di akhir bubble
+        const avatarArea = bubbleElement.querySelector('.message-avatar');
+        if (avatarArea && avatarArea.nextElementSibling) {
+             bubbleElement.insertBefore(contentWrapper, avatarArea.nextElementSibling);
+        } else {
+             bubbleElement.appendChild(contentWrapper);
+        }
+    } else {
+         contentWrapper.innerHTML = ''; // Bersihkan isinya ("Just a sec...")
+    }
+
+
+    // 3. Buat dan tambahkan avatar AI statis di awal bubble (jika belum ada)
+    let avatarArea = bubbleElement.querySelector('.message-avatar');
+    if (!avatarArea) {
+        console.warn("Could not find avatar area in loading bubble. Creating a new one.");
+        avatarArea = document.createElement('div');
+        avatarArea.classList.add('message-avatar');
+        bubbleElement.insertBefore(avatarArea, bubbleElement.firstChild); // Tambahkan di awal bubble
+    }
+
+    // Isi avatar area dengan SVG statis
+    const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48_${Date.now()}"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55_${Date.now()}"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58_${Date.now()})" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.48999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1_${Date.now()}" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55_${Date.now()}"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48_${Date.now()})"&gt;&lt;g mask="url(#__lottie_element_55_1_${Date.now()})" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62_${Date.now()})" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
+    avatarArea.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
+
+
+    // 4. Tambahkan teks pesan final ke contentWrapper
+    const textDiv = document.createElement('div');
+    textDiv.classList.add('message-text');
+    if (isError) {
+        textDiv.style.color = 'red';
+        textDiv.style.fontStyle = 'italic';
+        textDiv.textContent = newContent;
+    } else {
+        // Terapkan Markdown
+        if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+            try {
+                const rawHtml = marked.parse(newContent);
+                const cleanHtml = DOMPurify.sanitize(rawHtml);
+                textDiv.innerHTML = cleanHtml;
+            } catch (parseError) {
+                console.error("Markdown parsing/sanitizing error:", parseError);
+                textDiv.textContent = newContent;
+                textDiv.style.fontStyle = 'italic';
+                textDiv.title = "Could not render Markdown.";
+            }
+        } else {
+            console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
+            textDiv.textContent = newContent;
+        }
+    }
+    contentWrapper.appendChild(textDiv);
+
+    // 5. Tambahkan actions ke contentWrapper (jika bukan error)
+    if (!isError) {
+        const actions = document.createElement('div');
+        actions.classList.add('message-actions');
+        actions.innerHTML = `
+            <button class="icon-button" aria-label="Like response"><span class="material-symbols-outlined">thumb_up</span></button>
+            <button class="icon-button" aria-label="Dislike response"><span class="material-symbols-outlined">thumb_down</span></button>
+            <button class="icon-button" aria-label="Share & export"><span class="material-symbols-outlined">share</span></button>
+            <button class="icon-button" aria-label="More options"><span class="material-symbols-outlined">more_vert</span></button>
+        `;
+        contentWrapper.appendChild(actions);
+    }
+
+    // 6. Tambahkan kembali tombol more mobile jika perlu (opsional, tergantung struktur akhir)
+    // Tombol ini sudah ada di bubble, tidak perlu ditambahkan lagi di sini
+    // Pastikan struktur HTML di addMessage sudah benar menempatkannya di bubble, bukan contentWrapper
+
+    // Scroll ke bawah lagi
+    setTimeout(() => {
+        if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
+    }, 50);
+
+    // Hapus referensi elemen loading
+    currentLoadingBubbleElement = null; // RESET VARIABEL
+}
+
+
 
 // --- Fungsi Inti API (Memanggil Vercel Function) ---
-async function callGeminiAPI(prompt, history) {
+async function callGeminiAPI(prompt, history, signal) { // <<< PASTIKAN ADA 'signal' DI SINI
     const endpoint = '/api/chat';
     const payload = {
         prompt: prompt,
@@ -349,6 +515,7 @@ async function callGeminiAPI(prompt, history) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
+            signal: signal // <<< PASTIKAN 'signal' DITERUSKAN KE FETCH
         });
         const data = await response.json();
         if (!response.ok) {
@@ -363,45 +530,70 @@ async function callGeminiAPI(prompt, history) {
              throw new Error("Received unexpected success response from server.");
         }
     } catch (error) {
+         if (error.name === 'AbortError') { // <<< Tangani AbortError
+            console.log('Fetch aborted in callGeminiAPI');
+            throw error; // Lempar ulang error spesifik
+        }
         console.error('Failed to call Vercel Function:', error);
-        throw error;
+        throw error; // Lempar ulang error lainnya
     }
 }
+
 
 // --- Fungsi Reset Chat ---
 function resetChat() {
     console.log("Starting new chat...");
+
+    // Cek dan batalkan generasi jika sedang berjalan
+    if (isGenerating) {
+        console.log("Resetting chat while generation is in progress. Aborting...");
+        if (currentAbortController) {
+            currentAbortController.abort(); // Batalkan fetch yang sedang berjalan
+        }
+        // Hapus elemen loading jika masih ada
+        if (currentLoadingBubbleElement) { // <<< GUNAKAN VARIABEL BARU
+            const bubbleContainer = currentLoadingBubbleElement.closest('.message-container'); // <<< Cari container dari bubble
+            if (bubbleContainer) {
+                bubbleContainer.remove();
+            }
+            currentLoadingBubbleElement = null; // <<< RESET VARIABEL BARU
+        }
+        // Reset state generating secara paksa
+        isGenerating = false;
+        currentAbortController = null;
+    }
+
+    // Lanjutkan reset seperti biasa
     if (chatContentWrapper) chatContentWrapper.innerHTML = '';
     if (promptTextarea) {
         promptTextarea.value = '';
-        promptTextarea.dispatchEvent(new Event('input'));
+        // Pastikan textarea di-enable jika user login
+        promptTextarea.disabled = !isLoggedIn;
+        promptTextarea.dispatchEvent(new Event('input')); // Update tombol mic/send
     }
     currentChatHistory = [];
     currentChatId = null;
 
     document.querySelectorAll('#recent-chats-list li.active-item').forEach(li => li.classList.remove('active-item'));
 
-    if (isGenerating) {
-        console.log("Resetting UI from generating state during chat reset.");
-        isGenerating = false;
-        if (inputArea) inputArea.classList.remove('is-sending');
-        if (promptTextarea) promptTextarea.disabled = !isLoggedIn;
-        if (stopButton) {
-            stopButton.disabled = true;
-            stopButton.style.display = 'none';
-        }
-        if (promptTextarea) promptTextarea.dispatchEvent(new Event('input')); // Update tombol
-        if (isLoggedIn && promptTextarea) promptTextarea.focus();
+    // Reset UI tombol stop/send/mic (dilakukan juga oleh event input textarea)
+    if (inputArea) inputArea.classList.remove('is-sending');
+    if (stopButton) {
+        stopButton.style.display = 'none';
+        stopButton.disabled = true;
     }
+    if (promptTextarea) promptTextarea.dispatchEvent(new Event('input')); // Pastikan tombol benar
 
     if (isMobile && isSidenavOpen) {
         isSidenavOpen = false;
         applySidenavState();
     }
     isChatStarted = false;
-    addWelcomeMessage();
+    addWelcomeMessage(); // Tampilkan kembali welcome message
     console.log("Chat reset complete.");
+    if (isLoggedIn && promptTextarea) promptTextarea.focus(); // Fokus ke input jika login
 }
+
 
 
 // --- Fungsi Autentikasi ---
@@ -500,7 +692,7 @@ async function loadChatDetails(chatId) {
             chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
 
             chatData.messages.forEach(message => {
-              addMessage(message.text, message.role);
+              addMessage(message.text, message.role); // Memuat dari history, tidak isLoading
             });
             currentChatHistory = chatData.messages.map(msg => ({
                 role: msg.role,
@@ -673,7 +865,7 @@ if (auth) {
             if (sendButton) sendButton.disabled = true;
             if (recentChatsList) recentChatsList.innerHTML = '<li>Login untuk melihat history</li>';
 
-            resetChat();
+            resetChat(); // Reset chat area on logout
 
             if (unsubscribeChatsListener) {
                 unsubscribeChatsListener();
@@ -804,7 +996,7 @@ document.addEventListener('click', (event) => {
      }
  });
 
-if (sendButton) {
+ if (sendButton) {
     sendButton.addEventListener('click', async () => {
         if (!isLoggedIn || !currentUser) {
             alert("Silakan login terlebih dahulu untuk mengirim pesan.");
@@ -814,50 +1006,77 @@ if (sendButton) {
 
         const messageText = promptTextarea.value.trim();
         if (messageText && !isGenerating) {
-            addMessage(messageText, 'user');
+            addMessage(messageText, 'user'); // Tambahkan pesan user
             const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
             const userMessageForDb = { role: "user", text: messageText };
             const historyForApi = [...currentChatHistory];
+
+            // --- Mulai Loading ---
             isGenerating = true;
             promptTextarea.value = '';
             promptTextarea.disabled = true;
-            promptTextarea.dispatchEvent(new Event('input'));
+            promptTextarea.dispatchEvent(new Event('input')); // Update UI (tampilkan tombol stop)
+            addMessage(null, 'ai', { isLoading: true }); // <<< TAMBAHKAN INDIKATOR LOADING (Ini akan membuat bubble loading)
+            // --- Akhir Loading ---
+
+            currentAbortController = new AbortController(); // Buat controller baru
 
             try {
-                const aiResponseText = await callGeminiAPI(messageText, historyForApi);
-                addMessage(aiResponseText, 'ai');
+                // Panggil API dengan signal
+                const aiResponseText = await callGeminiAPI(messageText, historyForApi, currentAbortController.signal); // <<< PANGGIL DENGAN SIGNAL
+
+                // --- Update Pesan Loading dengan Sukses ---
+                updateLoadingMessage(aiResponseText); // <<< UPDATE PESAN LOADING
+                // --- Akhir Update ---
+
                 const aiMessageForHistory = { role: "model", parts: [{ text: aiResponseText }] };
                 const aiMessageForDb = { role: "model", text: aiResponseText };
 
+                // Simpan ke Firestore setelah respons diterima dan ditampilkan
                 await saveMessagesToFirestore(userMessageForDb, aiMessageForDb);
 
+                // Update history lokal
                 currentChatHistory.push(userMessageForHistory);
                 currentChatHistory.push(aiMessageForHistory);
 
             } catch (error) {
-                addMessage(`Error: ${error.message}`, 'ai', true);
+                 if (error.name === 'AbortError') {
+                    console.log('Fetch aborted by user.');
+                    // --- Update Pesan Loading dengan Pesan Stop ---
+                    updateLoadingMessage("Generation stopped.", true); // <<< UPDATE DENGAN PESAN STOP
+                    // --- Akhir Update ---
+                } else {
+                    console.error("Error during API call or processing:", error);
+                    // --- Update Pesan Loading dengan Error ---
+                    updateLoadingMessage(`Error: ${error.message}`, true); // <<< UPDATE DENGAN PESAN ERROR
+                    // --- Akhir Update ---
+                }
             } finally {
                 isGenerating = false;
-                promptTextarea.disabled = false;
-                promptTextarea.dispatchEvent(new Event('input'));
-                promptTextarea.focus();
+                currentAbortController = null; // Hapus controller
+                if (promptTextarea) {
+                    promptTextarea.disabled = false;
+                    promptTextarea.dispatchEvent(new Event('input')); // Update UI (sembunyikan stop, tampilkan mic/send)
+                    promptTextarea.focus();
+                }
+                // currentLoadingBubbleElement sudah direset di updateLoadingMessage
             }
         }
     });
 }
 
+
 // Tombol Stop
 if (stopButton) {
     stopButton.addEventListener('click', () => {
-        console.log("Stop generation requested (UI only).");
-        if (isGenerating) {
-            isGenerating = false;
-            if (promptTextarea) {
-                promptTextarea.disabled = false;
-                promptTextarea.dispatchEvent(new Event('input'));
-                promptTextarea.focus();
-            }
-            addMessage("Generation stopped on client. Server process might have continued.", 'ai', true);
+        if (isGenerating && currentAbortController) {
+            console.log("Stop generation requested. Aborting fetch...");
+            currentAbortController.abort(); // Kirim sinyal abort ke fetch
+            // Tombol stop akan dinonaktifkan/disembunyikan di blok finally sendButton
+            // Kita bisa langsung disable di sini untuk feedback cepat
+            stopButton.disabled = true;
+        } else {
+            console.log("Stop button clicked but not generating or no controller.");
         }
     });
 }
@@ -924,7 +1143,7 @@ function handleDropdownItemClick(item) {
         if (newModel !== currentModel) {
             currentModel = newModel;
             console.log("API Model changed to:", currentModel);
-            if (isLoggedIn) resetChat();
+            if (isLoggedIn) resetChat(); // Reset chat saat model berubah
         } else {
              console.log("Model already set to:", currentModel);
         }
