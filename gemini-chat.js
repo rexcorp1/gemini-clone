@@ -1,3 +1,37 @@
+// --- Firebase Configuration ---
+// Ganti dengan konfigurasi Firebase project kamu!
+const firebaseConfig = {
+    apiKey: "AIzaSyDsJE-CEu2JcEbcuZvNRMTPsSgepknoH-A",
+    authDomain: "gemini-clone-6784a.firebaseapp.com",
+    projectId: "gemini-clone-6784a",
+    storageBucket: "gemini-clone-6784a.firebasestorage.app",
+    messagingSenderId: "887785035794",
+    appId: "1:887785035794:web:acd3409e097bea445320cb",
+    measurementId: "G-1Q6LGMHY7P"
+};
+
+// Initialize Firebase (Gunakan sintaks v8/compat)
+let app, auth, db;
+try {
+    // Akses global 'firebase' yang disediakan oleh script compat
+    if (typeof firebase === 'undefined') {
+        throw new Error("Firebase SDK (compat version) not loaded. Check script tags in HTML.");
+    }
+
+    app = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth(); // <-- Sintaks v8/compat
+    db = firebase.firestore(); // <-- Sintaks v8/compat
+
+    console.log("Firebase Initialized Successfully (v8 Compat)");
+} catch (error) {
+    console.error("Firebase Initialization Error:", error);
+    alert("Gagal menginisialisasi fitur utama. Silakan refresh halaman.");
+    // Set auth dan db ke null agar pengecekan selanjutnya gagal dengan benar
+    auth = null;
+    db = null;
+}
+
+
 // --- Konstanta Elemen DOM ---
 const menuToggleButton = document.getElementById('menu-toggle-button');
 const sidebar = document.getElementById('sidebar');
@@ -19,8 +53,20 @@ const bottomSheetScrim = document.getElementById('bottom-sheet-scrim');
 const selectedModeText = document.getElementById('selected-mode-text');
 const sidebarSelectedModeText = document.getElementById('sidebar-selected-mode-text');
 const sidebarNewChatButton = document.getElementById('sidebar-new-chat-button');
+const mobileNewChatButtonHeader = document.getElementById('mobile-new-chat-button-header');
 const dropdownItemsDesktop = modelDropdownMenu?.querySelectorAll('.dropdown-item[role^="menuitem"]') || [];
 const dropdownItemsMobile = modelBottomSheet.querySelectorAll('.dropdown-item[role^="menuitem"]');
+const welcomeHeading = document.getElementById('welcome-heading');
+const recentChatsList = document.getElementById('recent-chats-list');
+
+// --- Konstanta Elemen Auth ---
+const authButtonDesktop = document.getElementById('auth-button-desktop');
+const userProfileImgDesktop = document.getElementById('user-profile-img-desktop');
+const loginIconDesktop = document.getElementById('login-icon-desktop');
+const authButtonMobile = document.getElementById('auth-button-mobile');
+const userProfileImgMobile = document.getElementById('user-profile-img-mobile');
+const loginIconMobile = document.getElementById('login-icon-mobile');
+
 
 // --- Variabel State ---
 let isMobile = window.innerWidth <= 960;
@@ -29,12 +75,16 @@ let isSidenavCollapsed = !isMobile;
 let isBottomSheetOpen = false;
 let isGenerating = false;
 let isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
-// Default model (pastikan sesuai dengan salah satu case di handleDropdownItemClick)
-let currentModel = 'gemini-2.0-flash';
-let currentChatHistory = []; // Untuk menyimpan histori percakapan API
+let currentModel = 'gemini-2.0-flash'; // Default model yang lebih umum
+let currentChatHistory = []; // History untuk API call
+// --- Variabel State Auth & Firestore ---
+let currentUser = null;
+let isLoggedIn = false;
+let currentChatId = null; // ID chat Firestore yang aktif
+let unsubscribeChatsListener = null; // Fungsi untuk stop listener Firestore
 
 // --- Konfigurasi API ---
-// API Key DIHAPUS dari sini! Akan ditangani oleh backend Vercel.
+// API Key DIHAPUS
 
 // --- Fungsi UI: Sidebar, Bottom Sheet, Dropdown, Resize ---
 function closeModelDropdown() {
@@ -45,7 +95,7 @@ function closeModelDropdown() {
 
 function closeModelBottomSheet() {
     if (!isSidenavOpen && isMobile) {
-         document.body.style.overflow = '';
+        document.body.style.overflow = '';
     } else if (!isMobile) {
         document.body.style.overflow = '';
     }
@@ -75,8 +125,8 @@ function applySidenavState() {
         document.body.style.overflow = '';
         sidebar.style.transition = 'width 0.3s ease';
     }
-     closeModelDropdown();
-     closeModelBottomSheet();
+    closeModelDropdown();
+    closeModelBottomSheet();
 }
 
 function openModelBottomSheet() {
@@ -89,12 +139,12 @@ function openModelBottomSheet() {
     document.body.style.overflow = 'hidden';
 }
 
- function openModelDropdown() {
-     if (isMobile) return;
-     modelDropdownMenu?.classList.add('show');
-     modeSwitcherButton.classList.add('open');
-     modeSwitcherButton.setAttribute('aria-expanded', 'true');
- }
+function openModelDropdown() {
+    if (isMobile) return;
+    modelDropdownMenu?.classList.add('show');
+    modeSwitcherButton.classList.add('open');
+    modeSwitcherButton.setAttribute('aria-expanded', 'true');
+}
 
 function handleResize() {
     const nowMobile = window.innerWidth <= 960;
@@ -113,9 +163,10 @@ function handleResize() {
         }
         applySidenavState();
     }
-     closeModelDropdown();
-     closeModelBottomSheet();
+    closeModelDropdown();
+    closeModelBottomSheet();
 }
+
 
 // --- Fungsi UI: Pesan & Welcome Message ---
 function removeWelcomeMessage() {
@@ -127,15 +178,30 @@ function removeWelcomeMessage() {
 }
 
 function addWelcomeMessage() {
+    // Hanya tambahkan jika belum ada pesan lain DAN belum ada welcome message
     if (!chatContentWrapper.querySelector('.message-container') && !chatContentWrapper.querySelector('.welcome-message-container')) {
         const welcomeContainer = document.createElement('div');
         welcomeContainer.classList.add('welcome-message-container');
         const heading = document.createElement('h1');
-        heading.textContent = 'Hello, Guest';
+        heading.id = 'welcome-heading'; // Pastikan ID ada
+        heading.textContent = isLoggedIn ? `Halo, ${currentUser?.displayName || 'User'}` : 'Hello, Guest';
         welcomeContainer.appendChild(heading);
         chatContentWrapper.insertBefore(welcomeContainer, chatContentWrapper.firstChild);
         isChatStarted = false;
+    } else {
+        // Update teks jika welcome message sudah ada
+        const existingHeading = document.getElementById('welcome-heading');
+        if (existingHeading) {
+            existingHeading.textContent = isLoggedIn ? `Halo, ${currentUser?.displayName || 'User'}` : 'Hello, Guest';
+        }
     }
+}
+
+// Helper function to decode HTML entities
+function decodeHtmlEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
 }
 
 function addMessage(text, sender, isError = false) {
@@ -155,32 +221,24 @@ function addMessage(text, sender, isError = false) {
     if (isError) {
         textDiv.style.color = 'red';
         textDiv.style.fontStyle = 'italic';
-        textDiv.textContent = text; // Tampilkan error sebagai teks biasa
+        textDiv.textContent = text;
     } else if (sender === 'ai') {
-        // --- Integrasi Markdown Parser ---
-        // Pastikan library marked dan DOMPurify sudah di-load di HTML
         if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
             try {
-                // 1. Parse Markdown ke HTML
                 const rawHtml = marked.parse(text);
-                // 2. Sanitize HTML (PENTING!)
                 const cleanHtml = DOMPurify.sanitize(rawHtml);
-                // 3. Set innerHTML
                 textDiv.innerHTML = cleanHtml;
             } catch (parseError) {
                 console.error("Markdown parsing/sanitizing error:", parseError);
-                // Fallback ke teks biasa jika parsing gagal
                 textDiv.textContent = text;
                 textDiv.style.fontStyle = 'italic';
                 textDiv.title = "Could not render Markdown.";
             }
         } else {
             console.warn("marked.js or DOMPurify.js not loaded. Displaying raw text.");
-            textDiv.textContent = text; // Fallback jika library tidak ada
+            textDiv.textContent = text;
         }
-        // --- Akhir Integrasi Markdown ---
     } else {
-        // Untuk user, tetap tampilkan sebagai teks biasa
         textDiv.textContent = text;
     }
 
@@ -189,7 +247,13 @@ function addMessage(text, sender, isError = false) {
     if (sender === 'ai') {
         const bubble = document.createElement('div'); bubble.classList.add('message-bubble');
         const avatar = document.createElement('div'); avatar.classList.add('message-avatar');
-        avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"><defs><clipPath id="__lottie_element_48"><rect width="32" height="32" x="0" y="0"></rect></clipPath><g id="__lottie_element_55"><g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path fill="url(#__lottie_element_58)" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"></path></g></g></g><linearGradient id="__lottie_element_58" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"><stop offset="0%" stop-color="rgb(33,123,254)"></stop><stop offset="14%" stop-color="rgb(20,133,252)"></stop><stop offset="27%" stop-color="rgb(7,142,251)"></stop><stop offset="52%" stop-color="rgb(84,143,253)"></stop><stop offset="78%" stop-color="rgb(161,144,255)"></stop><stop offset="89%" stop-color="rgb(175,148,254)"></stop><stop offset="100%" stop-color="rgb(189,153,254)"></stop></linearGradient><linearGradient id="__lottie_element_62" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"><stop offset="0%" stop-color="rgb(33,123,254)"></stop><stop offset="14%" stop-color="rgb(20,133,252)"></stop><stop offset="27%" stop-color="rgb(7,142,251)"></stop><stop offset="52%" stop-color="rgb(84,143,253)"></stop><stop offset="78%" stop-color="rgb(161,144,255)"></stop><stop offset="89%" stop-color="rgb(175,148,254)"></stop><stop offset="100%" stop-color="rgb(189,153,254)"></stop></linearGradient><mask id="__lottie_element_55_1" mask-type="alpha"><use xlink:href="#__lottie_element_55"></use></mask></defs><g clip-path="url(#__lottie_element_48)"><g mask="url(#__lottie_element_55_1)" style="display: block;"><g transform="matrix(1,0,0,1,16,16)" opacity="1"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path fill="url(#__lottie_element_62)" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"></path></g></g></g></g></svg>`;
+
+        // --- GANTI SVG AVATAR AI ---
+        const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58)" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48)"&gt;&lt;g mask="url(#__lottie_element_55_1)" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62)" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
+        // Decode HTML entities before setting innerHTML
+        avatar.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
+        // --- AKHIR GANTI SVG ---
+
         bubble.appendChild(avatar);
 
         const actions = document.createElement('div'); actions.classList.add('message-actions');
@@ -203,80 +267,65 @@ function addMessage(text, sender, isError = false) {
     }
 
     chatContentWrapper.appendChild(messageContainer);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    setTimeout(() => {
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }, 50);
 }
 
 
 // --- Fungsi Inti API (Memanggil Vercel Function) ---
 async function callGeminiAPI(prompt, history) {
-    // Endpoint sekarang adalah Serverless Function kita di Vercel
-    const endpoint = '/api/chat'; // Path relatif ke file di folder /api
-
-    // Data yang dikirim ke serverless function
+    const endpoint = '/api/chat';
     const payload = {
         prompt: prompt,
         history: history,
-        model: currentModel // Kirim model yang dipilih saat ini
+        model: currentModel
     };
-
-    console.log("Sending to Vercel Function:", endpoint, payload); // Debugging frontend
-
+    console.log("Sending to Vercel Function:", endpoint, payload);
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
-            // AbortController frontend tidak bisa membatalkan fetch serverless secara efektif
         });
-
-        const data = await response.json(); // Baca respons dari serverless function
-
+        const data = await response.json();
         if (!response.ok) {
-            // Tangani error yang dikirim balik oleh serverless function
             console.error("Serverless Function Error:", data);
-            // Gunakan pesan error dari server jika ada, jika tidak gunakan status text
             throw new Error(data.error || `Server error: ${response.status} ${response.statusText}`);
         }
-
-        console.log("Vercel Function Success Response:", data); // Debugging frontend
-
-        // Serverless function seharusnya mengembalikan { text: "..." } jika sukses
-        if (typeof data.text === 'string') { // Periksa apakah 'text' ada dan berupa string
+        console.log("Vercel Function Success Response:", data);
+        if (typeof data.text === 'string') {
             return data.text;
         } else {
-             // Jika serverless function mengembalikan format lain (seharusnya tidak terjadi)
-             console.error("Unexpected success response format from server:", data);
-             throw new Error("Received unexpected success response from server.");
+            console.error("Unexpected success response format from server:", data);
+            throw new Error("Received unexpected success response from server.");
         }
-
     } catch (error) {
-        // Tangani network error atau error dari throw di atas
         console.error('Failed to call Vercel Function:', error);
-        // Tidak bisa membedakan AbortError dengan mudah lagi
-        throw error; // Re-throw untuk ditangani di listener tombol send
+        throw error;
     }
 }
 
 // --- Fungsi Reset Chat ---
 function resetChat() {
     console.log("Starting new chat...");
-    chatContentWrapper.innerHTML = '';
-    addWelcomeMessage();
+    chatContentWrapper.innerHTML = ''; // Hapus pesan di UI
     promptTextarea.value = '';
-    promptTextarea.dispatchEvent(new Event('input'));
-    currentChatHistory = [];
+    promptTextarea.dispatchEvent(new Event('input')); // Panggil setelah kosongkan
+    currentChatHistory = []; // Reset history JS
+    currentChatId = null; // Reset ID chat aktif
 
-    // Tombol stop hanya reset UI jika sedang generating
+    document.querySelectorAll('#recent-chats-list li.active-item').forEach(li => li.classList.remove('active-item'));
+
     if (isGenerating) {
         console.log("Resetting UI from generating state during chat reset.");
         isGenerating = false;
         inputArea.classList.remove('is-sending');
-        promptTextarea.disabled = false;
-        if (micButton) micButton.disabled = false;
-        promptTextarea.dispatchEvent(new Event('input'));
-        promptTextarea.focus();
+        promptTextarea.disabled = !isLoggedIn;
+        stopButton.disabled = true;
+        stopButton.style.display = 'none';
+        promptTextarea.dispatchEvent(new Event('input')); // Update tombol
+        if (isLoggedIn) promptTextarea.focus();
     }
 
     if (isMobile && isSidenavOpen) {
@@ -284,35 +333,312 @@ function resetChat() {
         applySidenavState();
     }
     isChatStarted = false;
+    addWelcomeMessage();
     console.log("Chat reset complete.");
 }
 
-// --- Event Listeners ---
 
-// Sidebar & Scrim Listeners
-menuToggleButton.addEventListener('click', () => {
-    if (isMobile) {
-        isSidenavOpen = !isSidenavOpen;
-    } else {
-        isSidenavCollapsed = !isSidenavCollapsed;
-        isSidenavOpen = true;
+// --- Fungsi Autentikasi (Gunakan sintaks v8/compat) ---
+function signInWithGoogle() {
+    if (!auth) {
+        console.error("Firebase Auth not initialized.");
+        alert("Fitur login belum siap. Silakan coba lagi nanti.");
+        return;
     }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("Login Google berhasil:", result.user?.uid);
+        })
+        .catch((error) => {
+            console.error("Error login Google:", error);
+            let message = "Login gagal. Silakan coba lagi.";
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                message = "Login dibatalkan atau jendela ditutup.";
+            }
+            alert(message);
+        });
+}
+
+function signOutUser() {
+    if (!auth) {
+        console.error("Firebase Auth not initialized.");
+        return;
+    }
+    auth.signOut()
+        .then(() => {
+            console.log("Logout berhasil");
+        })
+        .catch((error) => {
+            console.error("Error logout:", error);
+            alert(`Logout gagal: ${error.message}`);
+        });
+}
+
+// --- Fungsi Firestore (Gunakan sintaks v8/compat) ---
+function loadRecentChats(userId) {
+    if (!db || !userId || !recentChatsList) return;
+    console.log(`Loading recent chats for user ${userId}`);
+    recentChatsList.innerHTML = '<li>Loading history...</li>';
+
+    if (unsubscribeChatsListener) {
+        unsubscribeChatsListener();
+        console.log("Previous Firestore listener stopped.");
+    }
+
+    const chatsQuery = db.collection('chats')
+        .where('userId', '==', userId)
+        .orderBy('lastUpdatedAt', 'desc')
+        .limit(20);
+
+    unsubscribeChatsListener = chatsQuery.onSnapshot(snapshot => {
+        recentChatsList.innerHTML = ''; // Kosongkan list
+        if (snapshot.empty) {
+            recentChatsList.innerHTML = '<li>No recent chats</li>';
+            return;
+        }
+        snapshot.forEach(doc => {
+            const chatData = doc.data();
+            const chatId = doc.id;
+            const listItem = createChatListItem(chatId, chatData.title);
+            recentChatsList.appendChild(listItem);
+        });
+        if (currentChatId) {
+            highlightSidebarItem(currentChatId);
+        }
+    }, error => {
+        console.error("Error getting recent chats:", error);
+        recentChatsList.innerHTML = '<li>Error loading history</li>';
+        if (error.code === 'permission-denied') {
+            recentChatsList.innerHTML = '<li>Error: Insufficient permissions to load history. Check Firestore rules.</li>';
+        }
+    });
+}
+
+async function loadChatDetails(chatId) {
+    if (!db || !chatId) return;
+    console.log(`Loading chat details for ${chatId}`);
+    chatContentWrapper.innerHTML = '<div class="loading-spinner">Loading messages...</div>';
+    currentChatHistory = [];
+    currentChatId = chatId;
+
+    try {
+        const chatDocRef = db.collection('chats').doc(chatId);
+        const docSnap = await chatDocRef.get();
+
+        if (docSnap.exists) {
+            const chatData = docSnap.data();
+            chatContentWrapper.innerHTML = '';
+
+            if (chatData.messages && Array.isArray(chatData.messages)) {
+                chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
+
+                chatData.messages.forEach(message => {
+                    addMessage(message.text, message.role);
+                });
+                currentChatHistory = chatData.messages.map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.text }]
+                }));
+                isChatStarted = true;
+            } else {
+                addWelcomeMessage();
+                currentChatHistory = [];
+            }
+            setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 50);
+        } else {
+            console.log("No such chat document!");
+            chatContentWrapper.innerHTML = '<div>Chat not found. Maybe it was deleted?</div>';
+            currentChatId = null;
+            currentChatHistory = [];
+        }
+    } catch (error) {
+        console.error("Error getting chat details:", error);
+        chatContentWrapper.innerHTML = '<div>Error loading chat.</div>';
+        currentChatId = null;
+        currentChatHistory = [];
+    }
+}
+
+async function saveMessagesToFirestore(userMsgDb, aiMsgDb) {
+    if (!db || !currentUser) {
+        console.error("Firestore DB or Current User not available for saving.");
+        return;
+    }
+    const userUid = currentUser.uid;
+
+    const serverTime = firebase.firestore.FieldValue.serverTimestamp();
+    const clientTime = new Date();
+    const arrayUnion = firebase.firestore.FieldValue.arrayUnion;
+
+    const userMessageForDbWithTimestamp = { ...userMsgDb, timestamp: clientTime };
+    const aiMessageForDbWithTimestamp = { ...aiMsgDb, timestamp: clientTime };
+
+    try {
+        if (currentChatId) {
+            console.log(`Updating chat ${currentChatId}`);
+            const chatDocRef = db.collection('chats').doc(currentChatId);
+            await chatDocRef.update({
+                messages: arrayUnion(userMessageForDbWithTimestamp, aiMessageForDbWithTimestamp),
+                lastUpdatedAt: serverTime
+            });
+            console.log("Messages added to existing chat.");
+        } else {
+            console.log("Creating new chat");
+            const newChatData = {
+                userId: userUid,
+                title: userMsgDb.text.substring(0, 30) + (userMsgDb.text.length > 30 ? '...' : ''),
+                createdAt: serverTime,
+                lastUpdatedAt: serverTime,
+                messages: [userMessageForDbWithTimestamp, aiMessageForDbWithTimestamp]
+            };
+            const docRef = await db.collection('chats').add(newChatData);
+            currentChatId = docRef.id;
+            console.log("New chat created with ID:", currentChatId);
+            highlightSidebarItem(currentChatId);
+        }
+    } catch (error) {
+        console.error("Error saving messages to Firestore:", error);
+        alert("Gagal menyimpan pesan. Silakan coba lagi.");
+        if (!currentChatId && error) {
+            currentChatId = null;
+        }
+    }
+}
+
+async function deleteChatFirestore(chatId) {
+    if (!db || !chatId) return;
+    console.log("Deleting chat:", chatId);
+    try {
+        await db.collection('chats').doc(chatId).delete();
+        console.log("Chat successfully deleted from Firestore!");
+        if (currentChatId === chatId) {
+            resetChat();
+        }
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        alert("Gagal menghapus chat.");
+    }
+}
+
+
+// Helper createChatListItem (MODIFIKASI: Tambah Ikon)
+function createChatListItem(chatId, title) {
+    const listItem = document.createElement('li');
+    listItem.classList.add('conversation-item-container');
+    listItem.dataset.chatId = chatId;
+    // --- TAMBAHKAN IKON DI SINI ---
+    listItem.innerHTML = `
+        <div class="conversation-content">
+          <span class="material-symbols-outlined conversation-icon">notes</span>
+          <span class="conversation-title">${title || 'Untitled Chat'}</span>
+        </div>
+        <div class="conversation-actions">
+          <button class="icon-button delete-chat-button" aria-label="Delete chat" data-chat-id="${chatId}">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+    `;
+    // --- AKHIR TAMBAHAN IKON ---
+    listItem.addEventListener('click', (event) => {
+        if (event.target.closest('.delete-chat-button')) return;
+        if (listItem.classList.contains('active-item')) return;
+        highlightSidebarItem(chatId);
+        loadChatDetails(chatId);
+    });
+    const deleteButton = listItem.querySelector('.delete-chat-button');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (confirm(`Yakin ingin menghapus chat "${title || 'Untitled Chat'}"?`)) {
+                await deleteChatFirestore(chatId);
+            }
+        });
+    }
+    return listItem;
+}
+
+// Helper highlightSidebarItem
+function highlightSidebarItem(chatId) {
+    document.querySelectorAll('#recent-chats-list li').forEach(li => {
+        li.classList.toggle('active-item', li.dataset.chatId === chatId);
+    });
+}
+
+
+// --- Listener Status Autentikasi (Gunakan sintaks v8/compat) ---
+if (auth) {
+    auth.onAuthStateChanged((user) => {
+        const placeholderLoggedIn = "Ask Gemini";
+        const placeholderLoggedOut = "Silakan login untuk memulai chat...";
+
+        if (user) {
+            // User login
+            console.log("User logged in:", user.uid, user.displayName);
+            currentUser = user;
+            isLoggedIn = true;
+
+            const profilePicUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || 'U')}&background=random&color=fff`;
+            [authButtonDesktop, authButtonMobile].forEach(button => { if (button) button.classList.add('logged-in'); });
+            [userProfileImgDesktop, userProfileImgMobile].forEach(img => { if (img) img.src = profilePicUrl; });
+
+            addWelcomeMessage();
+            promptTextarea.disabled = false;
+            promptTextarea.placeholder = placeholderLoggedIn;
+            if (micButton) micButton.disabled = false;
+
+            loadRecentChats(user.uid);
+
+        } else {
+            // User logout
+            console.log("User logged out");
+            currentUser = null;
+            isLoggedIn = false;
+            currentChatId = null;
+
+            [authButtonDesktop, authButtonMobile].forEach(button => { if (button) button.classList.remove('logged-in'); });
+            [userProfileImgDesktop, userProfileImgMobile].forEach(img => { if (img) img.src = ""; });
+
+            addWelcomeMessage();
+            promptTextarea.disabled = true;
+            promptTextarea.placeholder = placeholderLoggedOut;
+            if (micButton) micButton.disabled = true;
+            sendButton.disabled = true;
+            if (recentChatsList) recentChatsList.innerHTML = '<li>Login untuk melihat history</li>';
+
+            resetChat();
+
+            if (unsubscribeChatsListener) {
+                unsubscribeChatsListener();
+                unsubscribeChatsListener = null;
+                console.log("Firestore listener stopped.");
+            }
+        }
+        promptTextarea.dispatchEvent(new Event('input'));
+    });
+} else {
+    console.error("Firebase Auth failed to initialize. Login functionality disabled.");
+    promptTextarea.disabled = true;
+    promptTextarea.placeholder = "Error: Fitur chat tidak tersedia.";
+    if (loginIconDesktop) loginIconDesktop.style.color = 'grey';
+    if (loginIconMobile) loginIconMobile.style.color = 'grey';
+}
+
+
+// --- Event Listeners ---
+// Sidebar & Scrim, Modal, Resize
+menuToggleButton.addEventListener('click', () => {
+    if (isMobile) { isSidenavOpen = !isSidenavOpen; }
+    else { isSidenavCollapsed = !isSidenavCollapsed; isSidenavOpen = true; }
     applySidenavState();
 });
-
-sidebarScrim.addEventListener('click', () => {
-    if (isMobile && isSidenavOpen) {
-        isSidenavOpen = false;
-        applySidenavState();
-    }
-});
-
-// Modal (Dropdown/Bottom Sheet) Listeners
+sidebarScrim.addEventListener('click', () => { if (isMobile && isSidenavOpen) { isSidenavOpen = false; applySidenavState(); } });
 bottomSheetScrim.addEventListener('click', closeModelBottomSheet);
 window.addEventListener('resize', handleResize);
 
-// Input Area Logic
+// Input Area Logic (Logika Tombol Mic/Send/Stop - REVISI)
 promptTextarea.addEventListener('input', () => {
+    // ... (kode resize textarea tetap sama) ...
     promptTextarea.style.height = 'auto';
     let scrollHeight = promptTextarea.scrollHeight;
     const maxHeightStyle = getComputedStyle(promptTextarea).maxHeight;
@@ -320,243 +646,243 @@ promptTextarea.addEventListener('input', () => {
     promptTextarea.style.height = (scrollHeight > maxHeight ? maxHeight : scrollHeight) + 'px';
     promptTextarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
 
-    if (!isGenerating) {
+    // Hanya update tombol jika user login
+    if (isLoggedIn) {
         const hasText = promptTextarea.value.trim().length > 0;
-        inputArea.classList.toggle('has-text', hasText);
-        sendButton.disabled = !hasText;
-        // micButton.disabled = hasText; // Opsional
+
+        if (isGenerating) {
+            // Sedang generating: Tampilkan Stop, Sembunyikan Mic & Send
+            if (stopButton) {
+                stopButton.style.display = 'inline-flex';
+                stopButton.disabled = false;
+            }
+            if (sendButton) sendButton.style.display = 'none';
+            if (micButton) micButton.style.display = 'none';
+        } else if (hasText) {
+            // Ada teks, tidak generating: Tampilkan Send, Sembunyikan Mic & Stop
+            if (sendButton) {
+                sendButton.style.display = 'inline-flex';
+                sendButton.disabled = false;
+            }
+            if (micButton) micButton.style.display = 'none';
+            if (stopButton) stopButton.style.display = 'none';
+        } else {
+            // Tidak ada teks, tidak generating: Tampilkan Mic, Sembunyikan Send & Stop
+            if (micButton) {
+                micButton.style.display = 'inline-flex';
+                micButton.disabled = false;
+            }
+            if (sendButton) sendButton.style.display = 'none';
+            if (stopButton) stopButton.style.display = 'none';
+        }
+    } else {
+        // Jika logout: Sembunyikan Send & Stop, tampilkan Mic (tapi disabled)
+        if (micButton) {
+            micButton.style.display = 'inline-flex';
+            micButton.disabled = true;
+        }
+        if (sendButton) sendButton.style.display = 'none';
+        if (stopButton) stopButton.style.display = 'none';
     }
 });
 
-// Tombol Send (Logika API via Vercel Function)
+
+// --- Event Listener Tombol Auth ---
+[authButtonDesktop, authButtonMobile].forEach(button => {
+    if (button) {
+        button.addEventListener('click', () => {
+            if (isLoggedIn) {
+                if (confirm("Apakah Anda yakin ingin logout?")) { signOutUser(); }
+            } else { signInWithGoogle(); }
+        });
+    }
+});
+
+
+// Tombol Send (Gunakan saveMessagesToFirestore - REVISI)
 sendButton.addEventListener('click', async () => {
+    if (!isLoggedIn || !currentUser) {
+        alert("Silakan login terlebih dahulu untuk mengirim pesan.");
+        signInWithGoogle();
+        return;
+    }
+
     const messageText = promptTextarea.value.trim();
     if (messageText && !isGenerating) {
         addMessage(messageText, 'user');
         const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
+        const userMessageForDb = { role: "user", text: messageText };
 
-        promptTextarea.value = '';
-        promptTextarea.dispatchEvent(new Event('input'));
+        const historyForApi = [...currentChatHistory];
+
+        // Update UI State (Generating) -> Panggil event input untuk update tombol
         isGenerating = true;
-        inputArea.classList.add('is-sending');
-        inputArea.classList.remove('has-text');
+        promptTextarea.value = ''; // Kosongkan setelah addMessage
         promptTextarea.disabled = true;
-        sendButton.disabled = true;
-        if (micButton) micButton.disabled = true;
-        // Tombol stop diaktifkan saat generating
-        stopButton.disabled = false;
-        stopButton.style.display = 'block'; // Tampilkan tombol stop
-        sendButton.style.display = 'none'; // Sembunyikan tombol send
+        promptTextarea.dispatchEvent(new Event('input')); // Update tombol ke state generating (tampilkan stop)
 
         try {
-            // Panggil fungsi yang memanggil Vercel Function
-            const aiResponseText = await callGeminiAPI(messageText, currentChatHistory);
-
-            // Tampilkan respons AI (sudah di-parse markdown di addMessage)
+            const aiResponseText = await callGeminiAPI(messageText, historyForApi);
             addMessage(aiResponseText, 'ai');
+            const aiMessageForHistory = { role: "model", parts: [{ text: aiResponseText }] };
+            const aiMessageForDb = { role: "model", text: aiResponseText };
 
-            // Tambahkan ke histori internal
+            await saveMessagesToFirestore(userMessageForDb, aiMessageForDb);
+
             currentChatHistory.push(userMessageForHistory);
-            currentChatHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+            currentChatHistory.push(aiMessageForHistory);
 
         } catch (error) {
-            // Tampilkan pesan error dari Vercel Function atau network
-             addMessage(`Error: ${error.message}`, 'ai', true);
+            addMessage(`Error: ${error.message}`, 'ai', true);
         } finally {
-            // Kembalikan UI state ke normal
+            // Kembalikan UI State -> Panggil event input untuk update tombol
             isGenerating = false;
-            inputArea.classList.remove('is-sending');
             promptTextarea.disabled = false;
-            if (micButton) micButton.disabled = false;
-            // Tombol stop dinonaktifkan dan disembunyikan lagi
-            stopButton.disabled = true;
-            stopButton.style.display = 'none';
-            // Tampilkan lagi tombol send (jika textarea kosong, state akan diatur oleh 'input' event)
-            sendButton.style.display = 'block';
-            promptTextarea.dispatchEvent(new Event('input')); // Update state tombol send/mic
+            // Panggil event input SETELAH isGenerating false dan textarea aktif
+            promptTextarea.dispatchEvent(new Event('input'));
             promptTextarea.focus();
         }
     }
 });
 
-// Tombol Stop (Hanya Reset UI Frontend)
+// Tombol Stop (Hanya Reset UI - REVISI)
 stopButton.addEventListener('click', () => {
     console.log("Stop generation requested (UI only).");
-    // Hanya reset state UI, tidak bisa membatalkan proses di server
-     if (isGenerating) {
-         isGenerating = false; // Set generating ke false
-         inputArea.classList.remove('is-sending');
-         promptTextarea.disabled = false;
-         if (micButton) micButton.disabled = false;
-         stopButton.disabled = true;
-         stopButton.style.display = 'none';
-         sendButton.style.display = 'block';
-         promptTextarea.dispatchEvent(new Event('input'));
-         promptTextarea.focus();
-         // Beri tahu user proses mungkin masih berjalan di server
-         addMessage("Generation stopped on client. Server process might have continued.", 'ai', true);
-     }
+    if (isGenerating) {
+        isGenerating = false; // Set state generating ke false
+        promptTextarea.disabled = false; // Aktifkan textarea
+        // Panggil event input untuk mengembalikan tombol ke state non-generating (tampilkan mic)
+        promptTextarea.dispatchEvent(new Event('input'));
+        promptTextarea.focus();
+        addMessage("Generation stopped on client. Server process might have continued.", 'ai', true);
+    }
 });
 
 
-// Tombol New Chat Listeners
-if (newChatButton) newChatButton.addEventListener('click', resetChat);
-if (sidebarNewChatButton) sidebarNewChatButton.addEventListener('click', resetChat);
+// Tombol New Chat
+function handleNewChatClick() {
+    if (!isLoggedIn) {
+        alert("Silakan login untuk memulai chat baru.");
+        signInWithGoogle();
+        return;
+    }
+    resetChat();
+}
+if (newChatButton) newChatButton.addEventListener('click', handleNewChatClick);
+if (sidebarNewChatButton) sidebarNewChatButton.addEventListener('click', handleNewChatClick);
+if (mobileNewChatButtonHeader) mobileNewChatButtonHeader.addEventListener('click', handleNewChatClick);
 
-// Kirim dengan Enter (hanya di non-mobile)
+
+// Kirim dengan Enter
 promptTextarea.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !sendButton.disabled && !isMobile) {
+    if (event.key === 'Enter' && !event.shiftKey && !sendButton.disabled && !isMobile && isLoggedIn) {
         event.preventDefault();
         sendButton.click();
     }
 });
 
-// Fungsi untuk handle klik tombol mode switcher
+// Mode Switcher & Dropdown/Bottom Sheet Logic
 function handleModeSwitchClick(event) {
-     event.stopPropagation();
-     if (isMobile) {
-         isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
-     } else {
-         modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
-     }
- }
-
-// Event Listener untuk Tombol Mode Switcher
+    event.stopPropagation();
+    if (isMobile) {
+        isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
+    } else {
+        modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
+    }
+}
 modeSwitcherButton.addEventListener('click', handleModeSwitchClick);
 if (sidebarModeSwitcherButton) sidebarModeSwitcherButton.addEventListener('click', handleModeSwitchClick);
-
-// Logika Klik di Luar Dropdown/Bottom Sheet
- document.addEventListener('click', (event) => {
-     const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
-                                  !modeSwitcherButton.contains(event.target) &&
-                                  !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
-                                  !modelDropdownMenu.contains(event.target);
-
-     if (isClickOutsideDropdown) {
-         closeModelDropdown();
-     }
- });
-
-// Logika Item Dropdown/Bottom Sheet (Update Model API)
+document.addEventListener('click', (event) => {
+    const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
+        !modeSwitcherButton.contains(event.target) &&
+        !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
+        !modelDropdownMenu.contains(event.target);
+    if (isClickOutsideDropdown) { closeModelDropdown(); }
+});
 function handleDropdownItemClick(item) {
-    const value = item.dataset.value; // Misal: "2.0 Flash"
+    const value = item.dataset.value;
     const role = item.getAttribute('role');
     console.log("Selected:", value, "Role:", role);
 
     if (role === 'menuitemradio') {
-        // 1. Update UI
-        const allRadioItems = document.querySelectorAll('.dropdown-item[role="menuitemradio"]');
-        allRadioItems.forEach(radioItem => {
-            radioItem.classList.remove('selected');
-            radioItem.setAttribute('aria-checked', 'false');
+        // Update UI
+        document.querySelectorAll('.dropdown-item[role="menuitemradio"]').forEach(radioItem => {
+            const isSelected = radioItem.dataset.value === value;
+            radioItem.classList.toggle('selected', isSelected);
+            radioItem.setAttribute('aria-checked', isSelected.toString());
             const checkmark = radioItem.querySelector('.checkmark-icon');
-            if (checkmark) checkmark.style.visibility = 'hidden';
+            if (checkmark) checkmark.style.visibility = isSelected ? 'visible' : 'hidden';
         });
-
-        const correspondingItems = document.querySelectorAll(`.dropdown-item[data-value="${value}"][role="menuitemradio"]`);
-        correspondingItems.forEach(corrItem => {
-            corrItem.classList.add('selected');
-            corrItem.setAttribute('aria-checked', 'true');
-            const checkmark = corrItem.querySelector('.checkmark-icon');
-            if (checkmark) checkmark.style.visibility = 'visible';
-        });
-
-        // 2. Update teks di header
+        // Update teks header
         selectedModeText.textContent = value;
         if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = value;
 
-        // 3. UPDATE MODEL API (Nama model harus sesuai dengan yang didukung API)
-        // Pastikan nama model ini valid di Google Generative AI API
-        let newModel = 'gemini-1.5-flash-latest'; // Default fallback yang lebih umum
+        // Update Model API
+        let newModel = 'gemini-2.0-flash'; // Fallback
         switch (value) {
-            case "2.0 Flash": // Sesuaikan teks ini dengan data-value di HTML Anda
-                // Cek nama model yang valid, 'gemini-2.0-flash' mungkin tidak ada
-                // Gunakan 'gemini-1.5-flash-latest' atau nama spesifik lain jika ada
-                newModel = 'gemini-1.5-flash-latest'; // Ganti jika ada model 2.0 yang valid
-                break;
-            case "2.5 Flash (experimental)": // Sesuaikan teks ini
-                 // Cek nama model preview yang valid
-                 newModel = 'gemini-1.5-flash-latest'; // Ganti jika ada nama preview spesifik
-                 break;
-            case "2.5 Pro (experimental)": // Sesuaikan teks ini
-                 // Cek nama model preview yang valid
-                newModel = 'gemini-1.5-pro-latest'; // Ganti jika ada nama preview spesifik
-                break;
-            default:
-                console.warn("Model mapping not found for:", value, ". Using default:", newModel);
+            case "2.0 Flash": newModel = 'gemini-2.0-flash'; break;
+            case "2.5 Flash (experimental)": newModel = 'gemini-2.5-flash-preview-04-17'; break;
+            case "2.5 Pro (experimental)": newModel = 'gemini-2.5-pro-preview-03-25'; break;
+            default: console.warn("Model mapping not found for:", value);
         }
-
         if (newModel !== currentModel) {
             currentModel = newModel;
             console.log("API Model changed to:", currentModel);
-            resetChat(); // Reset chat saat ganti model
+            if (isLoggedIn) resetChat(); // Reset hanya jika user login
         } else {
-             console.log("Model already set to:", currentModel);
+            console.log("Model already set to:", currentModel);
         }
-
     } else if (value === 'Gemini Advanced') {
         console.log("Upgrade button clicked");
         alert("Membuka halaman upgrade Gemini Advanced (simulasi).");
-        return;
+        return; // Jangan tutup modal
     } else {
         console.log(value + " clicked");
         alert("Fitur " + value + " diaktifkan (simulasi).");
     }
-
     if (isMobile) { closeModelBottomSheet(); } else { closeModelDropdown(); }
 }
-
-// Tambahkan event listener ke semua item di kedua menu
-dropdownItemsDesktop.forEach(item => {
-    item.addEventListener('click', () => handleDropdownItemClick(item));
-});
-dropdownItemsMobile.forEach(item => {
-    item.addEventListener('click', () => handleDropdownItemClick(item));
-});
+dropdownItemsDesktop.forEach(item => item.addEventListener('click', () => handleDropdownItemClick(item)));
+dropdownItemsMobile.forEach(item => item.addEventListener('click', () => handleDropdownItemClick(item)));
 
 
 // --- Inisialisasi Akhir Saat Load ---
 applySidenavState();
-promptTextarea.dispatchEvent(new Event('input'));
+// State awal UI diatur oleh onAuthStateChanged
 isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
-addWelcomeMessage();
-
-// Inisialisasi model dan teks header berdasarkan item terpilih awal
+// Inisialisasi model awal
 const initialSelectedItem = document.querySelector('.dropdown-item.selected[role="menuitemradio"]');
 if (initialSelectedItem) {
     const initialValue = initialSelectedItem.dataset.value;
     selectedModeText.textContent = initialValue;
-    if (sidebarSelectedModeText) {
-        sidebarSelectedModeText.textContent = initialValue;
+    if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = initialValue;
+    let initialModel = 'gemini-2.0-flash';
+    switch (initialValue) {
+        case "2.0 Flash": initialModel = 'gemini-2.0-flash'; break;
+        case "2.5 Flash (experimental)": initialModel = 'gemini-2.5-flash-preview-04-17'; break;
+        case "2.5 Pro (experimental)": initialModel = 'gemini-2.5-pro-preview-03-25'; break;
+        default: console.warn("Initial model mapping not found for:", initialValue);
     }
-    // Panggil handler untuk set `currentModel` awal (tanpa reset chat saat load)
-    const initialRole = initialSelectedItem.getAttribute('role');
-     if (initialRole === 'menuitemradio') {
-         let initialModel = 'gemini-1.5-flash-latest'; // Default fallback
-         switch (initialValue) {
-             case "2.0 Flash": initialModel = 'gemini-1.5-flash-latest'; break; // Sesuaikan
-             case "2.5 Flash (experimental)": initialModel = 'gemini-1.5-flash-latest'; break; // Sesuaikan
-             case "2.5 Pro (experimental)": initialModel = 'gemini-1.5-pro-latest'; break; // Sesuaikan
-             default: console.warn("Initial model mapping not found for:", initialValue);
-         }
-         currentModel = initialModel;
-         console.log("Initial API Model set to:", currentModel);
-     }
+    currentModel = initialModel;
+    console.log("Initial API Model set to:", currentModel);
     closeModelDropdown();
     closeModelBottomSheet();
 } else {
     console.warn("No initial selected model found in HTML. Defaulting to:", currentModel);
-    // Pastikan teks header sesuai default jika tidak ada item 'selected'
-    // Cari item yang data-value-nya cocok dengan currentModel default
+    // Cari item yang data-value-nya cocok dengan default model
     const defaultItem = document.querySelector(`.dropdown-item[data-value="2.0 Flash"]`); // Ganti "2.0 Flash" jika defaultnya beda
-    const defaultText = defaultItem ? defaultItem.dataset.value : "Default Model";
+    const defaultText = defaultItem ? defaultItem.dataset.value : "2.0 Flash"; // Teks default
     selectedModeText.textContent = defaultText;
-     if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
+    if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
 }
 
 // Pastikan tombol stop disembunyikan di awal
-stopButton.style.display = 'none';
-stopButton.disabled = true;
+if (stopButton) {
+    stopButton.style.display = 'none';
+    stopButton.disabled = true;
+}
+// Panggil event input sekali di awal untuk set state tombol mic/send awal
+promptTextarea.dispatchEvent(new Event('input'));
 
 
-console.log("Gemini Chat App Initialized (using Vercel Function). Ready.");
+console.log("Gemini Chat App Initialized (with Auth Compat). Waiting for Auth state...");

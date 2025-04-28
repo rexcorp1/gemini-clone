@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini</title>
-    <link rel="icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" type="image/svg+xml">
+    <link rel="icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+        type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -31,7 +32,8 @@
             --gem-sys-color--outline-variant: #c4c7c5;
             --gem-sys-color--inverse-surface: #e8eaf6;
             --gem-sys-color--on-inverse-surface: #2f3033;
-            --gem-sys-color--scrim: rgba(0, 0, 0, 0.32); /* Warna scrim */
+            --gem-sys-color--scrim: rgba(0, 0, 0, 0.32);
+            /* Warna scrim */
 
             /* Warna Lainnya */
             --bard-color-form-field-placeholder: var(--gem-sys-color--on-surface-variant);
@@ -40,13 +42,15 @@
             /* Ukuran Layout */
             --sidebar-width: 320px;
             --sidebar-collapsed-width: 72px;
-            --sidebar-mobile-width: calc(100vw - 56px); /* Lebar sidebar mobile */
+            --sidebar-mobile-width: calc(100vw - 56px);
+            /* Lebar sidebar mobile */
             --header-height: 64px;
             --input-area-min-height: 110px;
             --chat-max-width: 760px;
             --menu-button-top: 10px;
             --menu-button-height: 48px;
-            --new-chat-margin-top: 40px; /* Disesuaikan karena ada header sidebar mobile */
+            --new-chat-margin-top: 40px;
+            /* Disesuaikan karena ada header sidebar mobile */
             --location-footer-height: 60px;
             --dropdown-icon-area-width: 32px;
             --chat-container-padding-x: 16px;
@@ -55,177 +59,917 @@
             --bottom-area-height: calc(var(--input-area-min-height) + 16px + 16px + 16px);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; font-family: 'Google Sans', sans-serif; background-color: var(--gem-sys-color--surface); color: var(--gem-sys-color--on-surface); font-size: 14px; line-height: 1.5; overflow: hidden; }
-        button { cursor: pointer; border: none; background: none; padding: 0; font-family: inherit; color: inherit; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
-        ul { list-style: none; }
-        a { text-decoration: none; color: var(--gem-sys-color--primary); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Google Sans', sans-serif;
+            background-color: var(--gem-sys-color--surface);
+            color: var(--gem-sys-color--on-surface);
+            font-size: 14px;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            font-family: inherit;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--gem-sys-color--primary);
+        }
 
         /* --- Google Symbols Helper --- */
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 20px; display: inline-block; line-height: 1; vertical-align: middle; color: var(--gem-sys-color--on-surface-variant); }
-        .icon-filled { font-variation-settings: 'FILL' 1 !important; }
-        .gds-icon-l { font-size: 24px; } .gds-icon-m { font-size: 20px; } .gds-icon-s { font-size: 16px; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .icon-filled {
+            font-variation-settings: 'FILL' 1 !important;
+        }
+
+        .gds-icon-l {
+            font-size: 24px;
+        }
+
+        .gds-icon-m {
+            font-size: 20px;
+        }
+
+        .gds-icon-s {
+            font-size: 16px;
+        }
 
         /* --- Tombol Ikon Umum --- */
-        .icon-button { width: 40px; height: 40px; border-radius: 50%; color: var(--gem-sys-color--on-surface-variant); transition: background-color 0.2s ease; }
-        .icon-button:hover { background-color: var(--bard-color-input-area-buttons-hover-background); }
-        .icon-button .material-symbols-outlined { color: inherit; }
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--gem-sys-color--on-surface-variant);
+            transition: background-color 0.2s ease;
+        }
+
+        .icon-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+        }
+
+        .icon-button .material-symbols-outlined {
+            color: inherit;
+        }
 
         /* --- Struktur Utama --- */
-        .chat-app { display: flex; height: 100vh; position: relative; }
+        .chat-app {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
 
         /* --- Sidebar Scrim --- */
-        .sidebar-scrim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--gem-sys-color--scrim); z-index: 999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-        .sidebar-scrim.visible { opacity: 1; visibility: visible; }
+        .sidebar-scrim {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--gem-sys-color--scrim);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .sidebar-scrim.visible {
+            opacity: 1;
+            visibility: visible;
+        }
 
         /* --- Tombol Menu (di luar sidebar) --- */
         .menu-button-container {
-            position: absolute; /* Kembali ke absolute untuk desktop */
+            position: absolute;
+            /* Kembali ke absolute untuk desktop */
             top: var(--menu-button-top);
-            left: 14px; /* Geser sedikit ke kiri lagi untuk desktop */
+            left: 14px;
+            /* Geser sedikit ke kiri lagi untuk desktop */
             z-index: 1001;
             height: var(--menu-button-height);
-            display: block; /* Tampilkan di desktop */
+            display: block;
+            /* Tampilkan di desktop */
         }
-        #menu-toggle-button { width: 40px; height: 40px; border-radius: 50%; color: var(--gem-sys-color--on-surface); transition: background-color 0.2s ease; }
-        #menu-toggle-button:hover { background-color: var(--bard-color-input-area-buttons-hover-background); }
-        #menu-toggle-button .material-symbols-outlined { font-size: 20px; color: inherit; }
+
+        #menu-toggle-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--gem-sys-color--on-surface);
+            transition: background-color 0.2s ease;
+        }
+
+        #menu-toggle-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+        }
+
+        #menu-toggle-button .material-symbols-outlined {
+            font-size: 20px;
+            color: inherit;
+        }
 
         /* --- Sidebar --- */
-        .sidebar { width: var(--sidebar-width); background-color: var(--gem-sys-color--surface-container); display: flex; flex-direction: column; transition: width 0.3s ease, transform 0.3s ease; overflow: hidden; position: relative; z-index: 1000; flex-shrink: 0; transform: translateX(0); border-radius: 0; }
-        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--gem-sys-color--surface-container);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            z-index: 1000;
+            flex-shrink: 0;
+            transform: translateX(0);
+            border-radius: 0;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
 
         /* Header Sidebar Mobile */
         .sidebar-mobile-header {
-            display: none; /* Sembunyi di desktop */
+            display: none;
+            /* Sembunyi di desktop */
             height: var(--header-height);
-            padding: 0 8px 0 56px; /* Padding kiri=header utama mobile, kanan dikurangi */
+            padding: 0 8px 0 56px;
+            /* Padding kiri=header utama mobile, kanan dikurangi */
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
         }
-        .sidebar-header-left { display: flex; align-items: center; gap: 4px; }
-        .sidebar-header-right { display: flex; align-items: center; gap: 0; }
-        .sidebar-mobile-header .logo-mode-container { gap: 3px; }
-        .sidebar-mobile-header .logo-text { font-size: 18px; }
-        .sidebar-mobile-header .mode-switcher { padding: 1px 8px; font-size: 13px; }
-        .sidebar-mobile-header .mode-switcher .material-symbols-outlined { font-size: 20px; transition: none; transform: none !important; }
-        .sidebar-mobile-header .icon-button { color: var(--gem-sys-color--on-surface); }
-        .sidebar-mobile-header .icon-button .material-symbols-outlined { font-size: 24px; }
+
+        .sidebar-header-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sidebar-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .sidebar-mobile-header .logo-mode-container {
+            gap: 3px;
+        }
+
+        .sidebar-mobile-header .logo-text {
+            font-size: 18px;
+        }
+
+        .sidebar-mobile-header .mode-switcher {
+            padding: 1px 8px;
+            font-size: 13px;
+        }
+
+        .sidebar-mobile-header .mode-switcher .material-symbols-outlined {
+            font-size: 20px;
+            transition: none;
+            transform: none !important;
+        }
+
+        .sidebar-mobile-header .icon-button {
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .sidebar-mobile-header .icon-button .material-symbols-outlined {
+            font-size: 24px;
+        }
 
         .sidebar-top-content {
-            padding-top: calc(var(--menu-button-top) + var(--menu-button-height) + var(--new-chat-margin-top)); /* Padding atas default */
+            padding-top: calc(var(--menu-button-top) + var(--menu-button-height) + var(--new-chat-margin-top));
+            /* Padding atas default */
             padding-bottom: 16px;
             flex-shrink: 0;
         }
-        .new-chat-button { display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 12px; border-radius: 20px; background-color: var(--gem-sys-color--surface-container-high); color: var(--gem-sys-color--on-surface); font-weight: 500; width: auto; min-width: 56px; margin: 0 auto 12px 12px; transition: background-color 0.2s ease, width 0.3s ease; justify-content: flex-start; align-self: flex-start; white-space: nowrap; overflow: hidden; }
-        .new-chat-button:hover { background-color: var(--gem-sys-color--surface-container-highest); }
-        .new-chat-button .material-symbols-outlined { font-size: 24px; color: inherit; }
-        .new-chat-button .button-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; text-align: left; transition: opacity 0.2s ease; }
-        .sidebar.collapsed .sidebar-top-content { padding-top: calc(var(--menu-button-top) + var(--menu-button-height) + var(--new-chat-margin-top)); }
-        .sidebar.collapsed .new-chat-button { width: 40px; height: 40px; padding: 8px; justify-content: center; margin: 0 auto 12px auto; min-width: 40px; }
-        .sidebar.collapsed .new-chat-button .button-text { display: none; opacity: 0; }
-        .sidebar.collapsed .new-chat-button .material-symbols-outlined { font-size: 24px; }
-        .sidebar-section { overflow-y: auto; flex-grow: 1; scrollbar-width: thin; scrollbar-color: var(--gem-sys-color--outline) transparent; }
-        .sidebar-section::-webkit-scrollbar { width: 6px; }
-        .sidebar-section::-webkit-scrollbar-track { background: transparent; margin: 8px 0; }
-        .sidebar-section::-webkit-scrollbar-thumb { background-color: var(--gem-sys-color--outline); border-radius: 3px; }
-        .sidebar-title { font-size: 14px; font-weight: 500; color: var(--gem-sys-color--on-surface); padding: 8px 12px 4px 24px; text-transform: none; white-space: nowrap; overflow: hidden; }
-        .sidebar-section .sidebar-title:nth-of-type(2) { padding-top: 8px; }
-        .sidebar.collapsed .sidebar-title { display: none; }
-        .sidebar-list { padding: 0; }
-        .sidebar-item {display: flex;align-items: center;gap: 16px;padding: 8px 12px 8px 24px;borde;border-radius: 20px 20px 20px 20px;cursor: pointer;transition: background-color 0.2s ease, color 0.2s ease;color: var(--gem-sys-color--on-surface-variant);height: 40px;margin-right: 12px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
-        .sidebar-item:hover { background-color: var(--gem-sys-color--surface-container-high); color: var(--gem-sys-color--on-surface); }
-        .sidebar-item.selected { background-color: var(--gem-sys-color--primary-container); color: var(--gem-sys-color--on-primary-container); font-weight: 500; }
-        .sidebar-item .item-icon {font-size: 20px;color: inherit;flex-shrink: 0;width: 20px;text-align: center;}
-        .sidebar-item .item-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; transition: opacity 0.2s ease; }
-        .sidebar.collapsed .sidebar-item { border-radius: 50%; width: 40px; height: 40px; padding: 8px; margin: 4px auto; justify-content: center; }
-        .sidebar.collapsed .sidebar-item .item-text { display: none; opacity: 0; }
-        .sidebar.collapsed .sidebar-footer .sidebar-item .item-icon { font-size: 20px; width: 20px; }
-        .sidebar.collapsed .chat-history-list .sidebar-item, .sidebar.collapsed .gem-list .sidebar-item { display: none; }
+
+        .new-chat-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px 10px 12px;
+            border-radius: 20px;
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+            font-weight: 500;
+            width: auto;
+            min-width: 56px;
+            margin: 0 auto 12px 12px;
+            transition: background-color 0.2s ease, width 0.3s ease;
+            justify-content: flex-start;
+            align-self: flex-start;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .new-chat-button:hover {
+            background-color: var(--gem-sys-color--surface-container-highest);
+        }
+
+        .new-chat-button .material-symbols-outlined {
+            font-size: 24px;
+            color: inherit;
+        }
+
+        .new-chat-button .button-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            text-align: left;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.collapsed .sidebar-top-content {
+            padding-top: calc(var(--menu-button-top) + var(--menu-button-height) + var(--new-chat-margin-top));
+        }
+
+        .sidebar.collapsed .new-chat-button {
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+            min-width: 40px;
+        }
+
+        .sidebar.collapsed .new-chat-button .button-text {
+            display: none;
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .new-chat-button .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        .sidebar-section {
+            overflow-y: auto;
+            flex-grow: 1;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gem-sys-color--outline) transparent;
+        }
+
+        .sidebar-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-section::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 8px 0;
+        }
+
+        .sidebar-section::-webkit-scrollbar-thumb {
+            background-color: var(--gem-sys-color--outline);
+            border-radius: 3px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gem-sys-color--on-surface);
+            padding: 8px 12px 4px 24px;
+            text-transform: none;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar-section .sidebar-title:nth-of-type(2) {
+            padding-top: 8px;
+        }
+
+        .sidebar.collapsed .sidebar-title {
+            display: none;
+        }
+
+        .sidebar-list {
+            padding: 0;
+        }
+
+        /* Styling untuk item history chat (akan diisi JS) */
+        .conversation-item-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 12px 8px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            color: var(--gem-sys-color--on-surface-variant);
+            height: 40px;
+            margin-right: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-item-container:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .conversation-item-container.active-item {
+            background-color: var(--gem-sys-color--primary-container);
+            color: var(--gem-sys-color--on-primary-container);
+            font-weight: 500;
+        }
+
+        .conversation-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .conversation-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-actions {
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        .conversation-actions .icon-button {
+            width: 28px;
+            height: 28px;
+            color: var(--gem-sys-color--on-surface-variant);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .conversation-item-container:hover .conversation-actions .icon-button {
+            opacity: 1;
+        }
+
+        .conversation-actions .icon-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .conversation-actions .icon-button .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .sidebar.collapsed .conversation-item-container {
+            display: none;
+        }
+
+        /* Sembunyikan history di collapsed */
+
+        /* Styling untuk item Gems & Footer */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 12px 8px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            color: var(--gem-sys-color--on-surface-variant);
+            height: 40px;
+            margin-right: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .sidebar-item.selected {
+            background-color: var(--gem-sys-color--primary-container);
+            color: var(--gem-sys-color--on-primary-container);
+            font-weight: 500;
+        }
+
+        .sidebar-item .item-icon {
+            font-size: 20px;
+            color: inherit;
+            flex-shrink: 0;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-item .item-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.collapsed .sidebar-item {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            margin: 4px auto;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-item .item-text {
+            display: none;
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .sidebar-footer .sidebar-item .item-icon {
+            font-size: 20px;
+            width: 20px;
+        }
+
+        .sidebar.collapsed .gem-list .sidebar-item {
+            display: none;
+        }
 
         /* Styling untuk container ikon Gem */
         .gem-icon-container {
-            width: 24px; /* Ukuran lingkaran */
+            width: 24px;
             height: 24px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0; /* Agar tidak menyusut */
-            margin-right: -4px; /* Sesuaikan margin jika perlu */
+            flex-shrink: 0;
+            margin-right: -4px;
         }
-        .gem-icon-container .material-symbols-outlined {
-            font-size: 16px; /* Ukuran ikon di dalam lingkaran */
-            color: var(--gem-sys-color--on-surface); /* Warna ikon agar kontras */
-        }
-        /* Warna background spesifik */
-        .gem-chess-bg { background-color: #92e5ff; }
-        .gem-brainstormer-bg { background-color: #ffd289; }
-        .gem-career-bg { background-color: #ffcfb4; }
 
-        .show-more-button {display: flex;align-items: center;gap: 16px;padding: 8px 12px 8px 24px;color: var(--gem-sys-color--on-surface-variant);font-size: 14px;width: calc(100% - 12px);justify-content: flex-start;border-radius: 20px 20px 20px 20px;margin: 0 12px 4px 0;height: 40px;}
-        .show-more-button:hover { background-color: var(--gem-sys-color--surface-container-high); color: var(--gem-sys-color--on-surface); }
-        .show-more-button .material-symbols-outlined { font-size: 20px; color: inherit; }
-        .sidebar.collapsed .show-more-button { display: none; }
-        .sidebar-footer { padding: 8px 0 0 0; flex-shrink: 0; margin-top: auto; }
-        .sidebar-footer .sidebar-item { margin-right: 0; padding-left: 24px; }
-        .sidebar.collapsed .sidebar-footer .sidebar-item { margin: 0px auto; padding: 8px; }
-        .location-footer {font-size: 11px;color: #144ba5;padding: 8px 20px 12px 24px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;line-height: 1.3;min-height: var(--location-footer-height);display: flex;align-items: flex-start;gap: 6px;}
-        .location-footer .material-symbols-outlined { font-size: 10px; margin-top: 2px; color: var(--gem-sys-color--on-surface-variant); }
-        .location-footer a { color: var(--gem-sys-color--primary); cursor: pointer; }
-        .location-footer a:hover { text-decoration: underline; }
-        .sidebar.collapsed .location-footer { visibility: hidden; padding-top: 0; padding-bottom: 0; height: var(--location-footer-height); min-height: var(--location-footer-height); border-top: none; }
-        .sidebar.collapsed .location-footer > * { display: none; }
+        .gem-icon-container .material-symbols-outlined {
+            font-size: 16px;
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .gem-chess-bg {
+            background-color: #92e5ff;
+        }
+
+        .gem-brainstormer-bg {
+            background-color: #ffd289;
+        }
+
+        .gem-career-bg {
+            background-color: #ffcfb4;
+        }
+
+        .show-more-button {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 12px 8px 24px;
+            color: var(--gem-sys-color--on-surface-variant);
+            font-size: 14px;
+            width: calc(100% - 12px);
+            justify-content: flex-start;
+            border-radius: 20px;
+            margin: 0 12px 4px 0;
+            height: 40px;
+        }
+
+        .show-more-button:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .show-more-button .material-symbols-outlined {
+            font-size: 20px;
+            color: inherit;
+        }
+
+        .sidebar.collapsed .show-more-button {
+            display: none;
+        }
+
+        .sidebar-footer {
+            padding: 8px 0 0 0;
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+
+        .sidebar-footer .sidebar-item {
+            margin-right: 0;
+            padding-left: 24px;
+        }
+
+        .sidebar.collapsed .sidebar-footer .sidebar-item {
+            margin: 0px auto;
+            padding: 8px;
+        }
+
+        .location-footer {
+            font-size: 11px;
+            color: #144ba5;
+            padding: 8px 20px 12px 24px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+            min-height: var(--location-footer-height);
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .location-footer .material-symbols-outlined {
+            font-size: 10px;
+            margin-top: 2px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .location-footer a {
+            color: var(--gem-sys-color--primary);
+            cursor: pointer;
+        }
+
+        .location-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar.collapsed .location-footer {
+            visibility: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            height: var(--location-footer-height);
+            min-height: var(--location-footer-height);
+            border-top: none;
+        }
+
+        .sidebar.collapsed .location-footer>* {
+            display: none;
+        }
 
         /* --- Chat Area --- */
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; position: relative; overflow: hidden; }
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
 
         /* --- Chat Header --- */
-        .chat-header { height: var(--header-height); display: flex; justify-content: space-between; align-items: center; padding: 0 16px; gap: 16px; flex-shrink: 0; position: sticky; top: 0; background-color: var(--gem-sys-color--surface); z-index: 10; width: 100%; }
-        .header-left { display: flex; align-items: center; gap: 16px; }
-        .logo-mode-container { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; position: relative; }
-        .logo-text { font-family: 'Google Sans', sans-serif; font-size: 20px; font-weight: 400; color: var(--gem-sys-color--on-surface); line-height: 1.2; }
-        .mode-switcher { background-color: var(--gem-sys-color--surface-container); padding: 2px 10px; border-radius: 16px; font-size: 14px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--gem-sys-color--on-surface); transition: background-color 0.2s ease; position: relative; }
-        .mode-switcher:hover { background-color: #e0e6ed; }
-        .mode-switcher .material-symbols-outlined { font-size: 22px; color: var(--gem-sys-color--on-surface-variant); transition: transform 0.2s ease; }
-        .mode-switcher.open .material-symbols-outlined { transform: rotate(180deg); }
+        .chat-header {
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            gap: 16px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            background-color: var(--gem-sys-color--surface);
+            z-index: 10;
+            width: 100%;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-mode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
+            position: relative;
+        }
+
+        .logo-text {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--gem-sys-color--on-surface);
+            line-height: 1.2;
+        }
+
+        .mode-switcher {
+            background-color: var(--gem-sys-color--surface-container);
+            padding: 2px 10px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: var(--gem-sys-color--on-surface);
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+
+        .mode-switcher:hover {
+            background-color: #e0e6ed;
+        }
+
+        .mode-switcher .material-symbols-outlined {
+            font-size: 22px;
+            color: var(--gem-sys-color--on-surface-variant);
+            transition: transform 0.2s ease;
+        }
+
+        .mode-switcher.open .material-symbols-outlined {
+            transform: rotate(180deg);
+        }
 
         /* --- Model Dropdown (Hanya Desktop) --- */
-        .model-dropdown { position: absolute; top: calc(100% + 4px); left: 0; background-color: #f0f4f9; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: none; padding: 8px 0; width: 320px; z-index: 1002; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease; overflow: hidden; }
-        .model-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .model-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            background-color: #f0f4f9;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+            padding: 8px 0;
+            width: 320px;
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        .model-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
         /* Item styling (sama untuk dropdown & bottom sheet) */
-        .dropdown-header { display: flex; align-items: center; padding: 10px 16px; gap: 12px; cursor: default; }
-        .dropdown-header .item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .dropdown-header .item-icon img { max-width: 100%; max-height: 100%; }
-        .dropdown-header .item-text-main { font-size: 14px; color: var(--gem-sys-color--on-surface); line-height: 1.3; font-weight: 500; }
-        .dropdown-item { display: flex; align-items: center; padding: 2px 16px; cursor: pointer; gap: 12px; transition: background-color 0.2s ease; min-height: 44px; }
-        .dropdown-item:hover { background-color: var(--gem-sys-color--surface-container-high); }
-        .item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .dropdown-item:not(.item-gemini-advanced) .item-icon:empty { /* visibility: hidden; */ }
-        .dropdown-item.item-gemini-advanced .item-icon img { max-width: 100%; max-height: 100%; }
-        .dropdown-item .item-icon .material-symbols-outlined { font-size: 20px; color: var(--gem-sys-color--on-surface-variant); }
-        .item-text-content { flex-grow: 1; display: flex; flex-direction: column; }
-        .item-text-main { font-size: 14px; color: var(--gem-sys-color--on-surface); line-height: 1.3; font-weight: 500; }
-        .item-text-sub { font-size: 12px; color: var(--gem-sys-color--on-surface-variant); line-height: 1.3; }
-        .checkmark-icon { margin-left: auto; color: var(--gem-sys-color--primary); font-size: 20px; visibility: hidden; }
-        .dropdown-item.selected .checkmark-icon { visibility: visible; }
-        .upgrade-button { background-color: var(--gem-sys-color--surface-container-high); color: var(--gem-sys-color--primary); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 16px; margin-left: auto; transition: background-color 0.2s ease; }
-        .upgrade-button:hover { background-color: var(--gem-sys-color--surface-container-highest); }
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 12px;
+            cursor: default;
+        }
+
+        .dropdown-header .item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dropdown-header .item-icon img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .dropdown-header .item-text-main {
+            font-size: 14px;
+            color: var(--gem-sys-color--on-surface);
+            line-height: 1.3;
+            font-weight: 500;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 2px 16px;
+            cursor: pointer;
+            gap: 12px;
+            transition: background-color 0.2s ease;
+            min-height: 44px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+        }
+
+        .item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dropdown-item:not(.item-gemini-advanced) .item-icon:empty {
+            /* visibility: hidden; */
+        }
+
+        .dropdown-item.item-gemini-advanced .item-icon img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .dropdown-item .item-icon .material-symbols-outlined {
+            font-size: 20px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .item-text-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-text-main {
+            font-size: 14px;
+            color: var(--gem-sys-color--on-surface);
+            line-height: 1.3;
+            font-weight: 500;
+        }
+
+        .item-text-sub {
+            font-size: 12px;
+            color: var(--gem-sys-color--on-surface-variant);
+            line-height: 1.3;
+        }
+
+        .checkmark-icon {
+            margin-left: auto;
+            color: var(--gem-sys-color--primary);
+            font-size: 20px;
+            visibility: hidden;
+        }
+
+        .dropdown-item.selected .checkmark-icon {
+            visibility: visible;
+        }
+
+        .upgrade-button {
+            background-color: var(--gem-sys-color--surface-container-high);
+            color: var(--gem-sys-color--primary);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 16px;
+            margin-left: auto;
+            transition: background-color 0.2s ease;
+        }
+
+        .upgrade-button:hover {
+            background-color: var(--gem-sys-color--surface-container-highest);
+        }
 
         /* --- Header Right --- */
-        .header-right { display: flex; align-items: center; gap: 8px; }
-        .upsell-button { display: inline-flex; }
-        .upsell-button button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; border-radius: 8px; background-color: var(--gem-sys-color--surface-container-highest); color: var(--gem-sys-color--on-surface); font-size: 13px; font-weight: 500; transition: background-color 0.2s ease; white-space: nowrap; }
-        .upsell-button button:hover { background-color: var(--gem-sys-color--surface-container-high); }
-        .upsell-button img { width: 16px; height: 16px; }
-        .header-right .icon-button.storage-button { display: inline-flex; }
-        .header-right .icon-button { width: 40px; height: 40px; color: var(--gem-sys-color--on-surface-variant); }
-        .header-right .icon-button .material-symbols-outlined { font-size: 24px; color: inherit; }
-        .header-right .profile-button { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: var(--gem-sys-color--primary-container); margin-left: 4px; display: none; cursor: pointer; }
-        .header-right .profile-button img { width: 100%; height: 100%; object-fit: cover; }
-        .header-right .profile-button.desktop-only { display: flex; }
-        .header-right .icon-button.mobile-only, .header-right .profile-button.mobile-only { display: none; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upsell-button {
+            display: inline-flex;
+        }
+
+        .upsell-button button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 20px;
+            border-radius: 8px;
+            background-color: var(--gem-sys-color--surface-container-highest);
+            color: var(--gem-sys-color--on-surface);
+            font-size: 13px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .upsell-button button:hover {
+            background-color: var(--gem-sys-color--surface-container-high);
+        }
+
+        .upsell-button img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .header-right .icon-button.storage-button {
+            display: inline-flex;
+        }
+
+        .header-right .icon-button {
+            width: 40px;
+            height: 40px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .header-right .icon-button .material-symbols-outlined {
+            font-size: 24px;
+            color: inherit;
+        }
+
+        /* Tombol Profil/Auth */
+        .header-right .profile-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: transparent;
+            /* Hapus background default */
+            margin-left: 4px;
+            display: none;
+            /* Akan diatur oleh media query */
+            cursor: pointer;
+            border: 1px solid transparent;
+            /* Border agar ukuran konsisten */
+            transition: background-color 0.2s ease;
+        }
+
+        .header-right .profile-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+        }
+
+        .header-right .profile-button.desktop-only {
+            display: flex;
+        }
+
+        /* Tampilkan di desktop */
+        .header-right .icon-button.mobile-only,
+        .header-right .profile-button.mobile-only {
+            display: none;
+        }
+
+        /* Sembunyikan di desktop */
+
+        /* --- CSS untuk Auth State --- */
+        .profile-button .user-logged-in {
+            display: none;
+            /* Sembunyikan gambar profil secara default */
+            width: 100%;
+            /* Pastikan gambar mengisi tombol */
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            /* Pastikan gambar bundar */
+        }
+
+        .profile-button .user-logged-out {
+            display: inline-flex;
+            /* Tampilkan ikon login secara default */
+            font-size: 24px;
+            /* Sesuaikan ukuran ikon login jika perlu */
+            color: var(--gem-sys-color--on-surface-variant);
+            /* Warna ikon login */
+            margin: auto;
+            /* Pusatkan ikon */
+        }
+
+        .profile-button.logged-in .user-logged-in {
+            display: block;
+            /* Tampilkan gambar saat logged-in */
+        }
+
+        .profile-button.logged-in .user-logged-out {
+            display: none;
+            /* Sembunyikan ikon login saat logged-in */
+        }
+
+        /* Style untuk textarea disabled */
+        textarea:disabled {
+            background-color: #f5f5f5;
+            /* Beri sedikit indikasi visual */
+            cursor: not-allowed;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        /* --------------------------- */
+
 
         /* --- Chat History Container --- */
         .chat-history-container {
@@ -239,9 +983,19 @@
             flex-direction: column;
             height: calc(100vh - var(--header-height) - var(--bottom-area-height));
         }
-        .chat-history-container::-webkit-scrollbar { width: 8px; }
-        .chat-history-container::-webkit-scrollbar-track { background: transparent; }
-        .chat-history-container::-webkit-scrollbar-thumb { background-color: var(--gem-sys-color--outline); border-radius: 4px; }
+
+        .chat-history-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-history-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-history-container::-webkit-scrollbar-thumb {
+            background-color: var(--gem-sys-color--outline);
+            border-radius: 4px;
+        }
 
         /* Chat Content Wrapper */
         .chat-content-wrapper {
@@ -262,6 +1016,7 @@
             align-items: center;
             flex-grow: 1;
             text-align: center;
+            padding: 20px;
         }
 
         .welcome-message-container h1 {
@@ -275,13 +1030,25 @@
         }
 
         /* --- Message Bubbles --- */
-        .message-container { display: flex; flex-direction: column; gap: 8px; width: fit-content; max-width: 100%; align-self: flex-start; }
-        .user-query { align-self: flex-end; }
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: fit-content;
+            max-width: 100%;
+            align-self: flex-start;
+        }
+
+        .user-query {
+            align-self: flex-end;
+        }
+
         .message-bubble {
             display: flex;
             gap: 12px;
             align-items: flex-start;
         }
+
         .message-avatar {
             flex-shrink: 0;
             width: 32px;
@@ -293,19 +1060,134 @@
             overflow: hidden;
             margin-top: 3px;
         }
+
         .message-avatar svg {
             width: 100%;
             height: 100%;
             display: block;
         }
-        .message-content-wrapper { display: flex; flex-direction: column; gap: 4px; }
-        .message-text { padding: 10px 16px; border-radius: 18px; line-height: 1.6; word-wrap: break-word; font-size: 15px; }
-        .user-query .message-text { background-color: var(--gem-sys-color--inverse-surface); color: var(--gem-sys-color--on-inverse-surface); border-radius: 18px 4px 18px 18px; }
-        .model-response .message-text { color: var(--gem-sys-color--on-surface); }
-        .message-actions { display: flex; gap: 4px; padding-left: 8px; }
-        .message-actions .icon-button { width: 28px; height: 28px; color: var(--gem-sys-color--on-surface-variant); }
-        .message-actions .icon-button:hover { background-color: var(--bard-color-input-area-buttons-hover-background); color: var(--gem-sys-color--on-surface); }
-        .message-actions .icon-button .material-symbols-outlined { font-size: 18px; }
+
+        .message-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-text {
+            padding: 10px 16px;
+            border-radius: 18px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            font-size: 15px;
+        }
+
+        .user-query .message-text {
+            background-color: var(--gem-sys-color--inverse-surface);
+            color: var(--gem-sys-color--on-inverse-surface);
+            border-radius: 18px 4px 18px 18px;
+        }
+
+        .model-response .message-text {
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        /* Style untuk markdown */
+        .model-response .message-text h1,
+        .model-response .message-text h2,
+        .model-response .message-text h3 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+
+        .model-response .message-text h1 {
+            font-size: 1.4em;
+        }
+
+        .model-response .message-text h2 {
+            font-size: 1.2em;
+        }
+
+        .model-response .message-text h3 {
+            font-size: 1.1em;
+        }
+
+        .model-response .message-text p {
+            margin-bottom: 0.8em;
+            line-height: 1.6;
+        }
+
+        .model-response .message-text ul,
+        .model-response .message-text ol {
+            margin-left: 1.5em;
+            margin-bottom: 0.8em;
+            padding-left: 1em;
+        }
+
+        .model-response .message-text li {
+            margin-bottom: 0.3em;
+        }
+
+        .model-response .message-text code:not(pre code) {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .model-response .message-text pre {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+
+        .model-response .message-text pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.9em;
+        }
+
+        .model-response .message-text blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1em;
+            margin-left: 0;
+            margin-bottom: 1em;
+            color: #555;
+        }
+
+        .model-response .message-text a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .model-response .message-text a:hover {
+            text-decoration: underline;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 4px;
+            padding-left: 8px;
+        }
+
+        .message-actions .icon-button {
+            width: 28px;
+            height: 28px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .message-actions .icon-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .message-actions .icon-button .material-symbols-outlined {
+            font-size: 18px;
+        }
 
         /* --- Input Area --- */
         .input-container {
@@ -319,28 +1201,137 @@
             z-index: 1;
             flex-shrink: 0;
         }
-        .input-area { display: flex; flex-direction: column; gap: 8px; background-color: #ffffff; border: 1px solid var(--gem-sys-color--outline-variant); border-radius: 24px; padding: 8px 8px; min-height: var(--input-area-min-height); transition: border-color 0.2s ease; }
-        .input-area:focus-within { border-color: var(--gem-sys-color--outline); }
-        .input-area textarea { flex-grow: 1; border: none; outline: none; background: transparent; resize: none; font-family: inherit; font-size: 16px; line-height: 1.5; color: var(--gem-sys-color--on-surface); padding: 10px 12px; width: 100%; min-height: 40px; max-height: 200px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--gem-sys-color--outline) transparent; }
-        .input-area textarea::-webkit-scrollbar { width: 6px; }
-        .input-area textarea::-webkit-scrollbar-track { background: transparent; margin: 8px 0; }
-        .input-area textarea::-webkit-scrollbar-thumb { background-color: var(--gem-sys-color--outline); border-radius: 3px; }
-        .input-area textarea::placeholder { color: var(--bard-color-form-field-placeholder); }
-        .input-bottom-actions { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .input-bottom-left { display: flex; align-items: center; gap: 8px; }
-        .input-bottom-left .upload-button { width: 42px; height: 42px; }
-        .input-bottom-left .upload-button:hover { background-color: var(--gem-sys-color--surface-container-highest); }
-        .input-bottom-left .upload-button .material-symbols-outlined { font-size: 24px; color: var(--gem-sys-color--on-surface-variant); }
-        .input-bottom-left .text-button { padding: 12px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; gap: 4px; color: var(--gem-sys-color--on-surface-variant); transition: background-color 0.2s ease; }
-        .input-bottom-left .text-button:hover { background-color: var(--bard-color-input-area-buttons-hover-background); color: var(--gem-sys-color--on-surface); }
-        .input-bottom-left .text-button .material-symbols-outlined { font-size: 18px; font-weight: 400; }
-        .input-bottom-right { display: flex; align-items: center; }
-        .input-bottom-right .icon-button { width: 40px; height: 40px; }
-        .input-area .send-button, .input-area .stop-button { display: none; }
-        .input-area .mic-button { display: inline-flex; }
-        .input-area.has-text .send-button { display: inline-flex; }
-        .input-area.has-text .mic-button { display: none; }
-        .input-area.has-text .stop-button { display: none; }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: #ffffff;
+            border: 1px solid var(--gem-sys-color--outline-variant);
+            border-radius: 24px;
+            padding: 8px 8px;
+            min-height: var(--input-area-min-height);
+            transition: border-color 0.2s ease;
+        }
+
+        .input-area:focus-within {
+            border-color: var(--gem-sys-color--outline);
+        }
+
+        .input-area textarea {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            resize: none;
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--gem-sys-color--on-surface);
+            padding: 10px 12px;
+            width: 100%;
+            min-height: 40px;
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gem-sys-color--outline) transparent;
+        }
+
+        .input-area textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .input-area textarea::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 8px 0;
+        }
+
+        .input-area textarea::-webkit-scrollbar-thumb {
+            background-color: var(--gem-sys-color--outline);
+            border-radius: 3px;
+        }
+
+        .input-area textarea::placeholder {
+            color: var(--bard-color-form-field-placeholder);
+        }
+
+        .input-bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-bottom-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-bottom-left .upload-button {
+            width: 42px;
+            height: 42px;
+        }
+
+        .input-bottom-left .upload-button:hover {
+            background-color: var(--gem-sys-color--surface-container-highest);
+        }
+
+        .input-bottom-left .upload-button .material-symbols-outlined {
+            font-size: 24px;
+            color: var(--gem-sys-color--on-surface-variant);
+        }
+
+        .input-bottom-left .text-button {
+            padding: 12px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            gap: 4px;
+            color: var(--gem-sys-color--on-surface-variant);
+            transition: background-color 0.2s ease;
+        }
+
+        .input-bottom-left .text-button:hover {
+            background-color: var(--bard-color-input-area-buttons-hover-background);
+            color: var(--gem-sys-color--on-surface);
+        }
+
+        .input-bottom-left .text-button .material-symbols-outlined {
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .input-bottom-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-bottom-right .icon-button {
+            width: 40px;
+            height: 40px;
+        }
+
+        .input-area .send-button,
+        .input-area .stop-button {
+            display: none;
+        }
+
+        .input-area .mic-button {
+            display: inline-flex;
+        }
+
+        .input-area.has-text .send-button {
+            display: inline-flex;
+        }
+
+        .input-area.has-text .mic-button {
+            display: none;
+        }
+
+        .input-area.has-text .stop-button {
+            display: none;
+        }
 
         /* Tombol Stop saat sending */
         .input-area.is-sending .stop-button {
@@ -348,50 +1339,135 @@
             background-color: var(--gem-sys-color--primary-container);
             color: var(--gem-sys-color--primary);
         }
+
         .input-area.is-sending .stop-button:hover {
-             background-color: var(--gem-sys-color--surface-container-high);
-        }
-        .input-area.is-sending .stop-button .material-symbols-outlined {
-             color: inherit;
-             font-variation-settings: 'FILL' 1; /* Ikon stop solid */
+            background-color: var(--gem-sys-color--surface-container-high);
         }
 
-        .input-area.is-sending .send-button { display: none; }
-        .input-area.is-sending .mic-button { display: none; }
+        .input-area.is-sending .stop-button .material-symbols-outlined {
+            color: inherit;
+            font-variation-settings: 'FILL' 1;
+            /* Ikon stop solid */
+        }
+
+        .input-area.is-sending .send-button {
+            display: none;
+        }
+
+        .input-area.is-sending .mic-button {
+            display: none;
+        }
 
         /* Tombol Send */
-        .input-area .send-button:disabled { background-color: transparent; color: var(--gem-sys-color--outline); cursor: default; }
-        .input-area .send-button:not(:disabled) { background-color: #f0f4f9; color: var(--gem-sys-color--on-primary-container); }
-        .input-area .send-button:not(:disabled):hover { background-color: #b8d6fb; }
-        .input-area .send-button .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        .input-area .send-button:disabled {
+            background-color: transparent;
+            color: var(--gem-sys-color--outline);
+            cursor: default;
+        }
+
+        .input-area .send-button:not(:disabled) {
+            background-color: #f0f4f9;
+            color: var(--gem-sys-color--on-primary-container);
+        }
+
+        .input-area .send-button:not(:disabled):hover {
+            background-color: #b8d6fb;
+        }
+
+        .input-area .send-button .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
 
         /* Tombol Mic */
         .input-area .mic-button .material-symbols-outlined {
-             font-variation-settings: 'FILL' 1; /* Ikon mic solid */
+            font-variation-settings: 'FILL' 1;
+            /* Ikon mic solid */
         }
 
 
-        .disclaimer { font-size: 12px; color: var(--gem-sys-color--on-surface-variant); text-align: center; margin-top: 16px; padding: 0 var(--chat-container-padding-x); line-height: 1.4; }
-        .disclaimer a { color: var(--gem-sys-color--on-surface-variant); text-decoration: underline; }
-        .disclaimer a:hover { color: var(--gem-sys-color--primary); }
+        .disclaimer {
+            font-size: 12px;
+            color: var(--gem-sys-color--on-surface-variant);
+            text-align: center;
+            margin-top: 16px;
+            padding: 0 var(--chat-container-padding-x);
+            line-height: 1.4;
+        }
+
+        .disclaimer a {
+            color: var(--gem-sys-color--on-surface-variant);
+            text-decoration: underline;
+        }
+
+        .disclaimer a:hover {
+            color: var(--gem-sys-color--primary);
+        }
 
         /* --- Bottom Sheet (Hanya Mobile) --- */
-        .bottom-sheet-scrim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--gem-sys-color--scrim); z-index: 1001; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-        .bottom-sheet-scrim.visible { opacity: 1; visibility: visible; }
-        .model-bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--gem-sys-color--surface-container); border-top-left-radius: var(--bottom-sheet-radius); border-top-right-radius: var(--bottom-sheet-radius); box-shadow: 0 -4px 16px rgba(0,0,0,0.12); padding: 8px 0 16px 0; z-index: 1002; transform: translateY(100%); visibility: hidden; transition: transform 0.3s ease, visibility 0.3s ease; max-height: 75vh; overflow-y: auto; }
-        .model-bottom-sheet.show { transform: translateY(0); visibility: visible; }
-        .model-bottom-sheet .dropdown-item { padding-left: var(--chat-container-padding-x); padding-right: var(--chat-container-padding-x); }
-        .model-bottom-sheet .dropdown-header { padding-left: var(--chat-container-padding-x); padding-right: var(--chat-container-padding-x); }
+        .bottom-sheet-scrim {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--gem-sys-color--scrim);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .bottom-sheet-scrim.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .model-bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--gem-sys-color--surface-container);
+            border-top-left-radius: var(--bottom-sheet-radius);
+            border-top-right-radius: var(--bottom-sheet-radius);
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+            padding: 8px 0 16px 0;
+            z-index: 1002;
+            transform: translateY(100%);
+            visibility: hidden;
+            transition: transform 0.3s ease, visibility 0.3s ease;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .model-bottom-sheet.show {
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .model-bottom-sheet .dropdown-item {
+            padding-left: var(--chat-container-padding-x);
+            padding-right: var(--chat-container-padding-x);
+        }
+
+        .model-bottom-sheet .dropdown-header {
+            padding-left: var(--chat-container-padding-x);
+            padding-right: var(--chat-container-padding-x);
+        }
 
         /* --- Responsiveness (MOBILE OVERRIDES) --- */
         @media screen and (max-width: 960px) {
-             :root {
+            :root {
                 --chat-container-padding-x: 12px;
                 --input-area-min-height: auto;
                 --bottom-area-height: calc(50px + 12px + 12px + 12px);
-             }
-             .chat-app { display: block; }
-             .sidebar {
+            }
+
+            .chat-app {
+                display: block;
+            }
+
+            .sidebar {
                 position: fixed;
                 left: 0;
                 top: 0;
@@ -402,70 +1478,222 @@
                 box-shadow: none;
                 border-top-right-radius: 12px;
                 border-bottom-right-radius: 12px;
-             }
-             .sidebar.open { transform: translateX(0); }
-             .sidebar.collapsed {
-                 transform: translateX(-100%);
-                 width: var(--sidebar-mobile-width);
-                 transition: transform 0.3s ease;
-                 border-radius: 0;
-             }
-             .sidebar.collapsed.open {
-                 transform: translateX(0);
-                 border-top-right-radius: 12px;
-                 border-bottom-right-radius: 12px;
-             }
-             .chat-area { width: 100%; flex-grow: unset; }
-             /* Tombol menu utama untuk membuka/menutup sidebar di mobile */
-             .menu-button-container {
-                 position: fixed;
-                 left: 10px;
-                 top: 10px;
-                 z-index: 1001;
-                 display: block;
-             }
-             #menu-toggle-button .material-symbols-outlined { font-size: 24px; }
+            }
 
-             /* Header utama di chat area */
-             .chat-header { padding: 0 12px 0 56px; gap: 8px; }
-             .header-left { gap: 4px; }
-             .logo-text { font-size: 18px; }
-             .mode-switcher { padding: 1px 8px; font-size: 13px; }
-             .mode-switcher .material-symbols-outlined { font-size: 20px; transition: none; transform: none !important; }
-             .mode-switcher.open .material-symbols-outlined { transform: none !important; }
-             .header-right { gap: 0; }
-             .header-right .icon-button.mobile-only { display: inline-flex; color: var(--gem-sys-color--on-surface); }
-             .header-right .profile-button.mobile-only { display: flex; }
-             .header-right .upsell-button, .header-right .icon-button.storage-button, .header-right .profile-button.desktop-only { display: none; }
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-             /* Tampilkan header di dalam sidebar mobile */
-             .sidebar-mobile-header { display: flex; }
-             /* Sesuaikan padding atas konten sidebar */
-             .sidebar-top-content { padding-top: var(--new-chat-margin-top); }
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+                width: var(--sidebar-mobile-width);
+                transition: transform 0.3s ease;
+                border-radius: 0;
+            }
+
+            .sidebar.collapsed.open {
+                transform: translateX(0);
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+            }
+
+            .chat-area {
+                width: 100%;
+                flex-grow: unset;
+            }
+
+            /* Tombol menu utama untuk membuka/menutup sidebar di mobile */
+            .menu-button-container {
+                position: fixed;
+                left: 10px;
+                top: 10px;
+                z-index: 1001;
+                display: block;
+            }
+
+            #menu-toggle-button .material-symbols-outlined {
+                font-size: 24px;
+            }
+
+            /* Styling untuk ikon di item history chat */
+            .conversation-content .conversation-icon {
+                font-size: 18px;
+                /* Ukuran ikon */
+                color: inherit;
+                /* Warna ikut teks induk */
+                margin-right: 12px;
+                /* Jarak ke kanan dari teks judul */
+                flex-shrink: 0;
+                /* Jangan biarkan ikon menyusut */
+                vertical-align: middle;
+                /* Sejajarkan vertikal (opsional) */
+            }
+
+            /* Pastikan padding kiri container cukup */
+            .conversation-item-container {
+                padding: 8px 12px 8px 24px;
+                /* Padding kiri asli */
+            }
+
+            /* Styling Tombol Stop saat aktif (is-sending) */
+            .input-area.is-sending .stop-button {
+                display: inline-flex;
+                background-color: var(--gem-sys-color--primary-container);
+                /* Warna background #d3e3fd */
+                color: var(--gem-sys-color--primary);
+                /* Warna ikon dan teks #0b57d0 */
+            }
+
+            .input-area.is-sending .stop-button:hover {
+                /* Efek hover sedikit lebih gelap */
+                filter: brightness(95%);
+            }
+
+            .input-area.is-sending .stop-button .material-symbols-outlined {
+                color: inherit;
+                /* Warna ikon ikut tombol */
+                font-variation-settings: 'FILL' 1;
+                /* <-- Ikon Jadi Solid */
+            }
+
+            /* Header utama di chat area */
+            .chat-header {
+                padding: 0 12px 0 56px;
+                gap: 8px;
+            }
+
+            .header-left {
+                gap: 4px;
+            }
+
+            .logo-text {
+                font-size: 18px;
+            }
+
+            .mode-switcher {
+                padding: 1px 8px;
+                font-size: 13px;
+            }
+
+            .mode-switcher .material-symbols-outlined {
+                font-size: 20px;
+                transition: none;
+                transform: none !important;
+            }
+
+            .mode-switcher.open .material-symbols-outlined {
+                transform: none !important;
+            }
+
+            .header-right {
+                gap: 0;
+            }
+
+            .header-right .icon-button.mobile-only {
+                display: inline-flex;
+                color: var(--gem-sys-color--on-surface);
+            }
+
+            .header-right .profile-button.mobile-only {
+                display: flex;
+            }
+
+            /* Tampilkan di mobile */
+            .header-right .upsell-button,
+            .header-right .icon-button.storage-button,
+            .header-right .profile-button.desktop-only {
+                display: none;
+            }
+
+            /* Sembunyikan di mobile */
+
+            /* Tampilkan header di dalam sidebar mobile */
+            .sidebar-mobile-header {
+                display: flex;
+            }
+
+            /* Sesuaikan padding atas konten sidebar */
+            .sidebar-top-content {
+                padding-top: var(--new-chat-margin-top);
+            }
 
 
-             .model-dropdown { display: none !important; }
-             .input-bottom-left .text-button { padding: 12px 8px; gap: 0; }
-             .input-bottom-left .text-button .material-symbols-outlined { display: none; }
-             .input-container { padding: 8px 12px 12px 12px; }
-             .input-area { min-height: var(--input-area-min-height); padding: 6px; }
-             .input-area textarea { padding: 8px 10px; font-size: 15px; min-height: 38px; }
-             .input-bottom-left .upload-button { width: 40px; height: 40px; }
-             .input-bottom-right .icon-button { width: 40px; height: 40px; }
-             .disclaimer { font-size: 11px; margin-top: 12px; padding: 0 8px;}
-             .model-bottom-sheet { display: block; }
-             .welcome-message-container h1 { font-size: 24px; }
-             .message-avatar { margin-top: 1px; }
-        }
-        /* Sembunyikan bottom sheet di desktop */
-        @media screen and (min-width: 961px) {
-            .model-bottom-sheet, .bottom-sheet-scrim {
+            .model-dropdown {
                 display: none !important;
             }
-            .sidebar-mobile-header { display: none; } /* Pastikan header sidebar mobile tersembunyi di desktop */
-            .menu-button-container { display: block; } /* Pastikan tombol menu utama tampil di desktop */
+
+            .input-bottom-left .text-button {
+                padding: 12px 8px;
+                gap: 0;
+            }
+
+            .input-bottom-left .text-button .material-symbols-outlined {
+                display: none;
+            }
+
+            .input-container {
+                padding: 8px 12px 12px 12px;
+            }
+
+            .input-area {
+                min-height: var(--input-area-min-height);
+                padding: 6px;
+            }
+
+            .input-area textarea {
+                padding: 8px 10px;
+                font-size: 15px;
+                min-height: 38px;
+            }
+
+            .input-bottom-left .upload-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .input-bottom-right .icon-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .disclaimer {
+                font-size: 11px;
+                margin-top: 12px;
+                padding: 0 8px;
+            }
+
+            .model-bottom-sheet {
+                display: block;
+            }
+
+            .welcome-message-container h1 {
+                font-size: 24px;
+            }
+
+            .message-avatar {
+                margin-top: 1px;
+            }
         }
 
+        /* Sembunyikan bottom sheet di desktop */
+        @media screen and (min-width: 961px) {
+
+            .model-bottom-sheet,
+            .bottom-sheet-scrim {
+                display: none !important;
+            }
+
+            .sidebar-mobile-header {
+                display: none;
+            }
+
+            /* Pastikan header sidebar mobile tersembunyi di desktop */
+            .menu-button-container {
+                display: block;
+            }
+
+            /* Pastikan tombol menu utama tampil di desktop */
+        }
     </style>
 </head>
 
@@ -484,12 +1712,13 @@
             <div class="sidebar-mobile-header">
                 <div class="sidebar-header-left">
                     <div class="logo-mode-container">
-                         <span class="logo-text">Gemini</span>
-                         <button class="mode-switcher" id="sidebar-mode-switcher-button" aria-haspopup="true" aria-expanded="false">
-                             <span id="sidebar-selected-mode-text">2.0 Flash</span>
-                             <span class="material-symbols-outlined gds-icon-s">arrow_drop_down</span>
-                         </button>
-                         </div>
+                        <span class="logo-text">Gemini</span>
+                        <button class="mode-switcher" id="sidebar-mode-switcher-button" aria-haspopup="true"
+                            aria-expanded="false">
+                            <span id="sidebar-selected-mode-text">2.0 Flash</span>
+                            <span class="material-symbols-outlined gds-icon-s">arrow_drop_down</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="sidebar-header-right">
                     <button class="icon-button" id="sidebar-new-chat-button" aria-label="New chat">
@@ -501,225 +1730,278 @@
                 </div>
             </div>
             <div class="sidebar-top-content">
-                 <button class="new-chat-button" id="new-chat-button" aria-label="New chat">
-                     <span class="material-symbols-outlined">add</span>
-                     <span class="button-text">New chat</span>
-                 </button>
-             </div>
-             <div class="sidebar-section">
-                 <div class="sidebar-title">Recent</div>
-                 <ul class="sidebar-list chat-history-list">
-                     <li class="sidebar-item selected"> <span class="material-symbols-outlined item-icon">notes</span> <span class="item-text">Sapaan Malam dan Bantuan</span> </li>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">notes</span> <span class="item-text">Perbandingan GPT-4o dan GPT-4 Turbo</span> </li>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">notes</span> <span class="item-text">Sapaan Sore di Bogor</span> </li>
-                 </ul>
-                 <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span> <span>More</span> </button>
-                 <div class="sidebar-title">Gems</div>
-                 <ul class="sidebar-list gem-list">
-                     <li class="sidebar-item">
-                         <span class="gem-icon-container gem-chess-bg"> <span class="material-symbols-outlined item-icon">chess</span>
-                         </span>
-                         <span class="item-text">Chess champ</span>
-                     </li>
-                     <li class="sidebar-item">
-                         <span class="gem-icon-container gem-brainstormer-bg">
+                <button class="new-chat-button" id="new-chat-button" aria-label="New chat">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="button-text">New chat</span>
+                </button>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Recent</div>
+                <!-- Tempat list chat history -->
+                <ul id="recent-chats-list" class="sidebar-list chat-history-list">
+                    <!-- Akan diisi oleh JavaScript -->
+                    <li>Login untuk melihat history</li>
+                </ul>
+                <!-- <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span> <span>More</span> </button> -->
+                <div class="sidebar-title">Gems</div>
+                <ul class="sidebar-list gem-list">
+                    <li class="sidebar-item">
+                        <span class="gem-icon-container gem-chess-bg"> <span
+                                class="material-symbols-outlined item-icon">chess</span>
+                        </span>
+                        <span class="item-text">Chess champ</span>
+                    </li>
+                    <li class="sidebar-item">
+                        <span class="gem-icon-container gem-brainstormer-bg">
                             <span class="material-symbols-outlined item-icon">emoji_objects</span>
-                         </span>
-                         <span class="item-text">Brainstormer</span>
-                     </li>
-                     <li class="sidebar-item">
-                         <span class="gem-icon-container gem-career-bg">
-                             <span class="material-symbols-outlined item-icon">work</span>
-                         </span>
-                         <span class="item-text">Career guide</span>
-                     </li>
-                 </ul>
-                 <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span> <span>More</span> </button>
-             </div>
-             <div class="sidebar-footer">
-                 <ul>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">diamond</span> <span class="item-text">Gem manager</span> </li>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">help</span> <span class="item-text">Help</span> </li>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">history</span> <span class="item-text">Activity</span> </li>
-                     <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">settings</span> <span class="item-text">Settings</span> </li>
-                 </ul>
-                 <div class="location-footer">
-                     <span class="material-symbols-outlined icon-filled">fiber_manual_record</span>
-                     <div> <span class="location-clickable">West Java, Indonesia</span><br> <span>From your IP address</span> • <span class="location-clickable">Update location</span> </div>
-                 </div>
-             </div>
+                        </span>
+                        <span class="item-text">Brainstormer</span>
+                    </li>
+                    <li class="sidebar-item">
+                        <span class="gem-icon-container gem-career-bg">
+                            <span class="material-symbols-outlined item-icon">work</span>
+                        </span>
+                        <span class="item-text">Career guide</span>
+                    </li>
+                </ul>
+                <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span>
+                    <span>More</span> </button>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">diamond</span> <span
+                            class="item-text">Gem manager</span> </li>
+                    <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">help</span> <span
+                            class="item-text">Help</span> </li>
+                    <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">history</span> <span
+                            class="item-text">Activity</span> </li>
+                    <li class="sidebar-item"> <span class="material-symbols-outlined item-icon">settings</span> <span
+                            class="item-text">Settings</span> </li>
+                </ul>
+                <div class="location-footer">
+                    <span class="material-symbols-outlined icon-filled">fiber_manual_record</span>
+                    <div> <span class="location-clickable">West Java, Indonesia</span><br> <span>From your IP
+                            address</span> • <span class="location-clickable">Update location</span> </div>
+                </div>
+            </div>
         </aside>
 
         <main class="chat-area" id="chat-area">
             <header class="chat-header">
-                 <div class="header-left">
-                     <div class="logo-mode-container">
-                         <span class="logo-text">Gemini</span>
-                         <button class="mode-switcher" id="mode-switcher-button" aria-haspopup="true" aria-expanded="false">
-                             <span id="selected-mode-text">2.0 Flash</span>
-                             <span class="material-symbols-outlined gds-icon-s">arrow_drop_down</span>
-                         </button>
-                         <div class="model-dropdown" id="model-dropdown-menu" role="menu">
-                              <div class="dropdown-header">
-                                  <div class="item-icon">
-                                      <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini Icon">
-                                  </div>
-                                  <span class="item-text-main">Gemini</span>
-                              </div>
-                              <div class="dropdown-item selected" role="menuitemradio" aria-checked="true" data-value="2.0 Flash">
-                                  <div class="item-icon"></div> <div class="item-text-content">
-                                      <span class="item-text-main">2.0 Flash</span>
-                                      <span class="item-text-sub">Get everyday help</span>
-                                  </div>
-                                  <span class="material-symbols-outlined checkmark-icon">check_circle</span>
-                              </div>
-                              <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Flash (experimental)">
-                                  <div class="item-icon"></div> <div class="item-text-content">
-                                      <span class="item-text-main">2.5 Flash (experimental)</span>
-                                      <span class="item-text-sub">Uses advanced reasoning</span>
-                                  </div>
-                                  <span class="material-symbols-outlined checkmark-icon">check_circle</span>
-                              </div>
-                               <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Pro (experimental)">
-                                  <div class="item-icon"></div> <div class="item-text-content">
-                                      <span class="item-text-main">2.5 Pro (experimental)</span>
-                                      <span class="item-text-sub">Best for complex tasks</span>
-                                  </div>
-                                  <span class="material-symbols-outlined checkmark-icon">check_circle</span>
-                              </div>
-                              <div class="dropdown-item" role="menuitem" data-value="Deep Research">
-                                  <div class="item-icon"></div>
-                                  <div class="item-text-content">
-                                      <span class="item-text-main">Deep Research</span>
-                                      <span class="item-text-sub">Get in-depth research reports</span>
-                                  </div>
-                              </div>
-                              <div class="dropdown-item" role="menuitem" data-value="Personalization">
-                                  <div class="item-icon"></div>
-                                  <div class="item-text-content">
-                                      <span class="item-text-main">Personalization (experimental)</span> <span class="item-text-sub">Help based on your Search history</span>
-                                  </div>
-                              </div>
-                              <div class="dropdown-item item-gemini-advanced" role="menuitem" data-value="Gemini Advanced">
-                                  <div class="item-icon">
-                                      <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg" alt="Gemini Advanced Icon">
-                                  </div>
-                                  <div class="item-text-content">
-                                      <span class="item-text-main">Gemini Advanced</span>
-                                  </div>
-                                  <button class="upgrade-button">Upgrade</button>
-                              </div>
-                         </div>
-                     </div>
-                 </div>
-                 <div class="header-right">
-                     <div class="upsell-button">
-                         <button>
-                             <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg" alt="">
-                             <span>Try Gemini Advanced</span>
-                         </button>
-                     </div>
-                     <button class="icon-button storage-button" aria-label="Files in this chat">
-                         <span class="material-symbols-outlined gds-icon-l">home_storage</span>
-                     </button>
-                     <button class="profile-button desktop-only" aria-label="Account">
-                          <img src="https://placehold.co/32x32/e0e6ed/1b1c1d?text=D" alt="User Profile Desktop">
-                     </button>
-                     <button class="icon-button mobile-only" aria-label="New chat">
-                         <span class="material-symbols-outlined">add</span>
-                     </button>
-                     <button class="icon-button mobile-only" aria-label="More options">
-                         <span class="material-symbols-outlined">more_vert</span>
-                     </button>
-                      <button class="profile-button mobile-only" aria-label="Account">
-                          <img src="https://placehold.co/32x32/d3e3fd/0842a0?text=A" alt="User Profile Mobile">
-                      </button>
-                 </div>
+                <div class="header-left">
+                    <div class="logo-mode-container">
+                        <span class="logo-text">Gemini</span>
+                        <button class="mode-switcher" id="mode-switcher-button" aria-haspopup="true"
+                            aria-expanded="false">
+                            <span id="selected-mode-text">2.0 Flash</span>
+                            <span class="material-symbols-outlined gds-icon-s">arrow_drop_down</span>
+                        </button>
+                        <div class="model-dropdown" id="model-dropdown-menu" role="menu">
+                            <!-- ... (Item dropdown tetap sama) ... -->
+                            <div class="dropdown-header">
+                                <div class="item-icon">
+                                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+                                        alt="Gemini Icon">
+                                </div>
+                                <span class="item-text-main">Gemini</span>
+                            </div>
+                            <div class="dropdown-item selected" role="menuitemradio" aria-checked="true"
+                                data-value="2.0 Flash">
+                                <div class="item-icon"></div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">2.0 Flash</span>
+                                    <span class="item-text-sub">Get everyday help</span>
+                                </div>
+                                <span class="material-symbols-outlined checkmark-icon">check_circle</span>
+                            </div>
+                            <div class="dropdown-item" role="menuitemradio" aria-checked="false"
+                                data-value="2.5 Flash (experimental)">
+                                <div class="item-icon"></div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">2.5 Flash (experimental)</span>
+                                    <span class="item-text-sub">Uses advanced reasoning</span>
+                                </div>
+                                <span class="material-symbols-outlined checkmark-icon">check_circle</span>
+                            </div>
+                            <div class="dropdown-item" role="menuitemradio" aria-checked="false"
+                                data-value="2.5 Pro (experimental)">
+                                <div class="item-icon"></div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">2.5 Pro (experimental)</span>
+                                    <span class="item-text-sub">Best for complex tasks</span>
+                                </div>
+                                <span class="material-symbols-outlined checkmark-icon">check_circle</span>
+                            </div>
+                            <div class="dropdown-item" role="menuitem" data-value="Deep Research">
+                                <div class="item-icon"></div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">Deep Research</span>
+                                    <span class="item-text-sub">Get in-depth research reports</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-item" role="menuitem" data-value="Personalization">
+                                <div class="item-icon"></div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">Personalization (experimental)</span> <span
+                                        class="item-text-sub">Help based on your Search history</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-item item-gemini-advanced" role="menuitem"
+                                data-value="Gemini Advanced">
+                                <div class="item-icon">
+                                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg"
+                                        alt="Gemini Advanced Icon">
+                                </div>
+                                <div class="item-text-content">
+                                    <span class="item-text-main">Gemini Advanced</span>
+                                </div>
+                                <button class="upgrade-button">Upgrade</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="upsell-button">
+                        <button>
+                            <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg"
+                                alt="">
+                            <span>Try Gemini Advanced</span>
+                        </button>
+                    </div>
+                    <button class="icon-button storage-button" aria-label="Files in this chat">
+                        <span class="material-symbols-outlined gds-icon-l">home_storage</span>
+                    </button>
+                    <!-- Tombol Auth Desktop -->
+                    <button class="profile-button desktop-only" id="auth-button-desktop" aria-label="Account">
+                        <img id="user-profile-img-desktop" class="user-logged-in" src="" alt="User Profile">
+                        <span id="login-icon-desktop" class="material-symbols-outlined user-logged-out">login</span>
+                    </button>
+                    <!-- Tombol Mobile (Add & More) -->
+                    <button class="icon-button mobile-only" id="mobile-new-chat-button-header" aria-label="New chat">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    <button class="icon-button mobile-only" aria-label="More options">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
+                    <!-- Tombol Auth Mobile -->
+                    <button class="profile-button mobile-only" id="auth-button-mobile" aria-label="Account">
+                        <img id="user-profile-img-mobile" class="user-logged-in" src="" alt="User Profile">
+                        <span id="login-icon-mobile" class="material-symbols-outlined user-logged-out">login</span>
+                    </button>
+                </div>
             </header>
 
             <div class="chat-history-container" id="chat-history">
                 <div class="chat-content-wrapper">
                     <div class="welcome-message-container">
-                        <h1>Hello, Guest</h1>
+                        <!-- Teks akan diatur oleh JS -->
+                        <h1 id="welcome-heading">Hello, Guest</h1>
                     </div>
                 </div>
             </div>
 
             <div class="input-container">
-                 <div class="input-area" id="input-area">
-                      <textarea id="prompt-textarea" placeholder="Ask Gemini" rows="1"></textarea>
-                      <div class="input-bottom-actions">
-                          <div class="input-bottom-left">
-                              <button class="icon-button upload-button" aria-label="Upload file"> <span class="material-symbols-outlined">add</span> </button>
-                              <button class="text-button deep-research-button" aria-label="Deep Research"> <span class="material-symbols-outlined">travel_explore</span> <span>Deep Research</span> </button>
-                              <button class="text-button canvas-button" aria-label="Open Canvas"> <span class="material-symbols-outlined">edit_note</span> <span>Canvas</span> </button>
-                          </div>
-                          <div class="input-bottom-right">
-                              <button class="icon-button mic-button" aria-label="Use microphone"> <span class="material-symbols-outlined icon-filled">mic</span> </button>
-                              <button class="icon-button send-button" aria-label="Send message" disabled> <span class="material-symbols-outlined">send</span> </button>
-                              <button class="icon-button stop-button" aria-label="Stop generation"> <span class="material-symbols-outlined">stop</span> </button>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="disclaimer"> Gemini can make mistakes, so double-check it </div>
+                <div class="input-area" id="input-area">
+                    <!-- Atribut disabled dan placeholder akan diatur oleh JS -->
+                    <textarea id="prompt-textarea" placeholder="Silakan login untuk memulai chat..." rows="1"
+                        disabled></textarea>
+                    <div class="input-bottom-actions">
+                        <div class="input-bottom-left">
+                            <button class="icon-button upload-button" aria-label="Upload file"> <span
+                                    class="material-symbols-outlined">add</span> </button>
+                            <button class="text-button deep-research-button" aria-label="Deep Research"> <span
+                                    class="material-symbols-outlined">travel_explore</span> <span>Deep Research</span>
+                            </button>
+                            <button class="text-button canvas-button" aria-label="Open Canvas"> <span
+                                    class="material-symbols-outlined">edit_note</span> <span>Canvas</span> </button>
+                        </div>
+                        <div class="input-bottom-right">
+                            <button class="icon-button mic-button" aria-label="Use microphone"> <span
+                                    class="material-symbols-outlined icon-filled">mic</span> </button>
+                            <button class="icon-button send-button" aria-label="Send message" disabled> <span
+                                    class="material-symbols-outlined">send</span> </button>
+                            <button class="icon-button stop-button" aria-label="Stop generation"> <span
+                                    class="material-symbols-outlined">stop</span> </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="disclaimer"> Gemini can make mistakes, so double-check it </div>
             </div>
 
         </main>
     </div>
 
     <div class="model-bottom-sheet" id="model-bottom-sheet" role="menu">
-         <div class="dropdown-header">
-              <div class="item-icon">
-                  <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini Icon">
-              </div>
-              <span class="item-text-main">Gemini</span>
-          </div>
-          <div class="dropdown-item selected" role="menuitemradio" aria-checked="true" data-value="2.0 Flash">
-              <div class="item-icon"></div> <div class="item-text-content">
-                  <span class="item-text-main">2.0 Flash</span>
-                  <span class="item-text-sub">Get everyday help</span>
-              </div>
-              <span class="material-symbols-outlined checkmark-icon">done</span>
-          </div>
-          <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Flash (experimental)">
-              <div class="item-icon"></div> <div class="item-text-content">
-                  <span class="item-text-main">2.5 Flash (experimental)</span>
-                  <span class="item-text-sub">Uses advanced reasoning</span>
-              </div>
-              <span class="material-symbols-outlined checkmark-icon">check_circle</span>
-          </div>
-           <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Pro (experimental)">
-              <div class="item-icon"></div> <div class="item-text-content">
-                  <span class="item-text-main">2.5 Pro (experimental)</span>
-                  <span class="item-text-sub">Best for complex tasks</span>
-              </div>
-              <span class="material-symbols-outlined checkmark-icon">done</span>
-          </div>
-          <div class="dropdown-item" role="menuitem" data-value="Deep Research">
-              <div class="item-icon"></div>
-              <div class="item-text-content">
-                  <span class="item-text-main">Deep Research</span>
-                  <span class="item-text-sub">Get in-depth research reports</span>
-              </div>
-          </div>
-          <div class="dropdown-item" role="menuitem" data-value="Personalization">
-              <div class="item-icon"></div>
-              <div class="item-text-content">
-                  <span class="item-text-main">Personalization (experimental)</span> <span class="item-text-sub">Help based on your Search history</span>
-              </div>
-          </div>
-          <div class="dropdown-item item-gemini-advanced" role="menuitem" data-value="Gemini Advanced">
-              <div class="item-icon">
-                  <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg" alt="Gemini Advanced Icon">
-              </div>
-              <div class="item-text-content">
-                  <span class="item-text-main">Gemini Advanced</span>
-              </div>
-              <button class="upgrade-button">Upgrade</button>
-          </div>
+        <!-- ... (Item bottom sheet tetap sama) ... -->
+        <div class="dropdown-header">
+            <div class="item-icon">
+                <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+                    alt="Gemini Icon">
+            </div>
+            <span class="item-text-main">Gemini</span>
+        </div>
+        <div class="dropdown-item selected" role="menuitemradio" aria-checked="true" data-value="2.0 Flash">
+            <div class="item-icon"></div>
+            <div class="item-text-content">
+                <span class="item-text-main">2.0 Flash</span>
+                <span class="item-text-sub">Get everyday help</span>
+            </div>
+            <span class="material-symbols-outlined checkmark-icon">done</span>
+        </div>
+        <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Flash (experimental)">
+            <div class="item-icon"></div>
+            <div class="item-text-content">
+                <span class="item-text-main">2.5 Flash (experimental)</span>
+                <span class="item-text-sub">Uses advanced reasoning</span>
+            </div>
+            <span class="material-symbols-outlined checkmark-icon">check_circle</span>
+        </div>
+        <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Pro (experimental)">
+            <div class="item-icon"></div>
+            <div class="item-text-content">
+                <span class="item-text-main">2.5 Pro (experimental)</span>
+                <span class="item-text-sub">Best for complex tasks</span>
+            </div>
+            <span class="material-symbols-outlined checkmark-icon">done</span>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-value="Deep Research">
+            <div class="item-icon"></div>
+            <div class="item-text-content">
+                <span class="item-text-main">Deep Research</span>
+                <span class="item-text-sub">Get in-depth research reports</span>
+            </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-value="Personalization">
+            <div class="item-icon"></div>
+            <div class="item-text-content">
+                <span class="item-text-main">Personalization (experimental)</span> <span class="item-text-sub">Help
+                    based on your Search history</span>
+            </div>
+        </div>
+        <div class="dropdown-item item-gemini-advanced" role="menuitem" data-value="Gemini Advanced">
+            <div class="item-icon">
+                <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_red_4ed1cbfcbc6c9e84c31b987da73fc4168aec8445.svg"
+                    alt="Gemini Advanced Icon">
+            </div>
+            <div class="item-text-content">
+                <span class="item-text-main">Gemini Advanced</span>
+            </div>
+            <button class="upgrade-button">Upgrade</button>
+        </div>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>    
-<script src="gemini-chat.js" defer></script>  
+
+    <!-- Script Firebase & Libraries -->
+    <!-- Ganti ke versi compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+
+    <!-- Library Markdown (tetap sama) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+
+    <!-- Script Aplikasi Kamu -->
+    <script src="gemini-chat.js" defer></script>
 </body>
+
 </html>
