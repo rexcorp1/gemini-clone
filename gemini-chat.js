@@ -1,32 +1,30 @@
 // --- Firebase Configuration ---
 // Ganti dengan konfigurasi Firebase project kamu!
 const firebaseConfig = {
-    apiKey: "AIzaSyDsJE-CEu2JcEbcuZvNRMTPsSgepknoH-A", // <-- Ganti jika perlu
-    authDomain: "gemini-clone-6784a.firebaseapp.com", // <-- Ganti jika perlu
-    projectId: "gemini-clone-6784a", // <-- Ganti jika perlu
-    storageBucket: "gemini-clone-6784a.firebasestorage.app", // <-- Ganti jika perlu
-    messagingSenderId: "887785035794", // <-- Ganti jika perlu
-    appId: "1:887785035794:web:acd3409e097bea445320cb", // <-- Ganti jika perlu
-    measurementId: "G-1Q6LGMHY7P" // <-- Ganti jika perlu
+    apiKey: "AIzaSyDsJE-CEu2JcEbcuZvNRMTPsSgepknoH-A",
+    authDomain: "gemini-clone-6784a.firebaseapp.com",
+    projectId: "gemini-clone-6784a",
+    storageBucket: "gemini-clone-6784a.firebasestorage.app",
+    messagingSenderId: "887785035794",
+    appId: "1:887785035794:web:acd3409e097bea445320cb",
+    measurementId: "G-1Q6LGMHY7P"
   };
 
 // Initialize Firebase (Gunakan sintaks v8/compat)
 let app, auth, db;
 try {
-    // Akses global 'firebase' yang disediakan oleh script compat
     if (typeof firebase === 'undefined') {
         throw new Error("Firebase SDK (compat version) not loaded. Check script tags in HTML.");
     }
 
     app = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth(); // <-- Sintaks v8/compat
-    db = firebase.firestore(); // <-- Sintaks v8/compat
+    auth = firebase.auth();
+    db = firebase.firestore();
 
     console.log("Firebase Initialized Successfully (v8 Compat)");
 } catch (error) {
     console.error("Firebase Initialization Error:", error);
     alert("Gagal menginisialisasi fitur utama. Silakan refresh halaman.");
-    // Set auth dan db ke null agar pengecekan selanjutnya gagal dengan benar
     auth = null;
     db = null;
 }
@@ -84,21 +82,19 @@ let isSidenavCollapsed = !isMobile;
 let isBottomSheetOpen = false;
 let isGenerating = false;
 let isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
-let currentModel = 'gemini-2.0-flash'; // Default model yang lebih umum
-let currentChatHistory = []; // History untuk API call
+let currentModel = 'gemini-2.0-flash';
+let currentChatHistory = [];
+
 // --- Variabel State Auth & Firestore ---
 let currentUser = null;
 let isLoggedIn = false;
-let currentChatId = null; // ID chat Firestore yang aktif
-let unsubscribeChatsListener = null; // Fungsi untuk stop listener Firestore
-let isAuthPopupOpen = false; // State untuk popup auth
-
-// --- Konfigurasi API ---
-// API Key DIHAPUS
+let currentChatId = null;
+let unsubscribeChatsListener = null;
+let isAuthPopupOpen = false;
 
 // --- Fungsi Auth Popup ---
 function updateAuthPopupContent() {
-    if (!authPopupMenu) return; // Pastikan elemen popup ada
+    if (!authPopupMenu) return;
 
     if (isLoggedIn && currentUser) {
         authPopupMenu.classList.remove('view-logged-out');
@@ -109,7 +105,6 @@ function updateAuthPopupContent() {
     } else {
         authPopupMenu.classList.remove('view-logged-in');
         authPopupMenu.classList.add('view-logged-out');
-        // Avatar default sudah di set di HTML src
     }
 }
 
@@ -120,7 +115,7 @@ function toggleAuthPopup() {
         authPopupMenu.classList.remove('show');
         isAuthPopupOpen = false;
     } else {
-        updateAuthPopupContent(); // Update konten SEBELUM ditampilkan
+        updateAuthPopupContent();
         authPopupMenu.classList.add('show');
         isAuthPopupOpen = true;
     }
@@ -219,7 +214,6 @@ function handleResize() {
      closeModelBottomSheet();
 }
 
-
 // --- Fungsi UI: Pesan & Welcome Message ---
 function removeWelcomeMessage() {
     const welcomeContainer = chatContentWrapper?.querySelector('.welcome-message-container');
@@ -231,18 +225,16 @@ function removeWelcomeMessage() {
 
 function addWelcomeMessage() {
     if (!chatContentWrapper) return;
-    // Hanya tambahkan jika belum ada pesan lain DAN belum ada welcome message
     if (!chatContentWrapper.querySelector('.message-container') && !chatContentWrapper.querySelector('.welcome-message-container')) {
         const welcomeContainer = document.createElement('div');
         welcomeContainer.classList.add('welcome-message-container');
         const heading = document.createElement('h1');
-        heading.id = 'welcome-heading'; // Pastikan ID ada
-        heading.textContent = isLoggedIn ? `Halo, ${currentUser?.displayName || 'User'}` : 'Hello, Guest';
+        heading.id = 'welcome-heading';
+        heading.textContent = isLoggedIn ? `Hello, ${currentUser?.displayName || 'User'}` : 'Hello, Guest';
         welcomeContainer.appendChild(heading);
         chatContentWrapper.insertBefore(welcomeContainer, chatContentWrapper.firstChild);
         isChatStarted = false;
     } else {
-        // Update teks jika welcome message sudah ada
         const existingHeading = document.getElementById('welcome-heading');
         if (existingHeading) {
             existingHeading.textContent = isLoggedIn ? `Halo, ${currentUser?.displayName || 'User'}` : 'Hello, Guest';
@@ -286,7 +278,7 @@ function addMessage(text, sender, isError = false) {
         moreButtonMobile.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
         bubble.appendChild(moreButtonMobile);
 
-        // 3. Wrapper Konten (Teks & Actions Asli)
+        // 3. Wrapper Konten
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content-wrapper');
 
@@ -379,13 +371,13 @@ async function callGeminiAPI(prompt, history) {
 // --- Fungsi Reset Chat ---
 function resetChat() {
     console.log("Starting new chat...");
-    if (chatContentWrapper) chatContentWrapper.innerHTML = ''; // Hapus pesan di UI
+    if (chatContentWrapper) chatContentWrapper.innerHTML = '';
     if (promptTextarea) {
         promptTextarea.value = '';
-        promptTextarea.dispatchEvent(new Event('input')); // Panggil setelah kosongkan
+        promptTextarea.dispatchEvent(new Event('input'));
     }
-    currentChatHistory = []; // Reset history JS
-    currentChatId = null; // Reset ID chat aktif
+    currentChatHistory = [];
+    currentChatId = null;
 
     document.querySelectorAll('#recent-chats-list li.active-item').forEach(li => li.classList.remove('active-item'));
 
@@ -412,7 +404,7 @@ function resetChat() {
 }
 
 
-// --- Fungsi Autentikasi (Gunakan sintaks v8/compat) ---
+// --- Fungsi Autentikasi ---
 function signInWithGoogle() {
     if (!auth) {
         console.error("Firebase Auth not initialized.");
@@ -449,7 +441,7 @@ function signOutUser() {
         });
 }
 
-// --- Fungsi Firestore (Gunakan sintaks v8/compat) ---
+// --- Fungsi Firestore ---
 function loadRecentChats(userId) {
     if (!db || !userId || !recentChatsList) return;
     console.log(`Loading recent chats for user ${userId}`);
@@ -466,7 +458,7 @@ function loadRecentChats(userId) {
                          .limit(20);
 
     unsubscribeChatsListener = chatsQuery.onSnapshot(snapshot => {
-        recentChatsList.innerHTML = ''; // Kosongkan list
+        recentChatsList.innerHTML = '';
         if (snapshot.empty) {
           recentChatsList.innerHTML = '<li>No recent chats</li>';
           return;
@@ -596,12 +588,11 @@ async function deleteChatFirestore(chatId) {
 }
 
 
-// Helper createChatListItem (MODIFIKASI: Tambah Ikon)
+// Helper createChatListItem
 function createChatListItem(chatId, title) {
     const listItem = document.createElement('li');
     listItem.classList.add('conversation-item-container');
     listItem.dataset.chatId = chatId;
-    // --- TAMBAHKAN IKON DI SINI ---
     listItem.innerHTML = `
         <div class="conversation-content">
           <span class="material-symbols-outlined conversation-icon">notes</span>
@@ -613,7 +604,6 @@ function createChatListItem(chatId, title) {
           </button>
         </div>
     `;
-    // --- AKHIR TAMBAHAN IKON ---
     listItem.addEventListener('click', (event) => {
         if (event.target.closest('.delete-chat-button')) return;
         if (listItem.classList.contains('active-item')) return;
@@ -640,14 +630,13 @@ function highlightSidebarItem(chatId) {
 }
 
 
-// --- Listener Status Autentikasi (Gunakan sintaks v8/compat) ---
+// --- Listener Status Autentikasi ---
 if (auth) {
     auth.onAuthStateChanged((user) => {
         const placeholderLoggedIn = "Ask Gemini";
         const placeholderLoggedOut = "Silakan login untuk memulai chat...";
 
         if (user) {
-            // User login
             console.log("User logged in:", user.uid, user.displayName);
             currentUser = user;
             isLoggedIn = true;
@@ -664,10 +653,9 @@ if (auth) {
             if (micButton) micButton.disabled = false;
 
             loadRecentChats(user.uid);
-            updateAuthPopupContent(); // Update konten popup jika sudah login
+            updateAuthPopupContent();
 
         } else {
-            // User logout
             console.log("User logged out");
             currentUser = null;
             isLoggedIn = false;
@@ -692,13 +680,11 @@ if (auth) {
                 unsubscribeChatsListener = null;
                 console.log("Firestore listener stopped.");
             }
-            updateAuthPopupContent(); // Update konten popup jika sudah logout
-            // Tutup popup jika terbuka saat logout
+            updateAuthPopupContent();
             if (isAuthPopupOpen) {
                 toggleAuthPopup();
             }
         }
-        // Panggil event input di akhir untuk memastikan state tombol benar
         if (promptTextarea) promptTextarea.dispatchEvent(new Event('input'));
     });
 } else {
@@ -709,7 +695,7 @@ if (auth) {
     }
     if (loginIconDesktop) loginIconDesktop.style.color = 'grey';
     if (loginIconMobile) loginIconMobile.style.color = 'grey';
-    updateAuthPopupContent(); // Tampilkan state logged out di popup
+    updateAuthPopupContent();
 }
 
 
@@ -730,7 +716,7 @@ if (bottomSheetScrim) {
 }
 window.addEventListener('resize', handleResize);
 
-// Input Area Logic (Logika Tombol Mic/Send/Stop - REVISI)
+// Input Area Logic
 if (promptTextarea) {
     promptTextarea.addEventListener('input', () => {
         // ... (kode resize textarea tetap sama) ...
@@ -741,12 +727,11 @@ if (promptTextarea) {
         promptTextarea.style.height = (scrollHeight > maxHeight ? maxHeight : scrollHeight) + 'px';
         promptTextarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
 
-        // Hanya update tombol jika user login
+
         if (isLoggedIn) {
             const hasText = promptTextarea.value.trim().length > 0;
 
             if (isGenerating) {
-                // Sedang generating: Tampilkan Stop, Sembunyikan Mic & Send
                 if (stopButton) {
                     stopButton.style.display = 'inline-flex';
                     stopButton.disabled = false;
@@ -754,7 +739,6 @@ if (promptTextarea) {
                 if (sendButton) sendButton.style.display = 'none';
                 if (micButton) micButton.style.display = 'none';
             } else if (hasText) {
-                // Ada teks, tidak generating: Tampilkan Send, Sembunyikan Mic & Stop
                 if (sendButton) {
                     sendButton.style.display = 'inline-flex';
                     sendButton.disabled = false;
@@ -762,7 +746,6 @@ if (promptTextarea) {
                 if (micButton) micButton.style.display = 'none';
                 if (stopButton) stopButton.style.display = 'none';
             } else {
-                // Tidak ada teks, tidak generating: Tampilkan Mic, Sembunyikan Send & Stop
                 if (micButton) {
                     micButton.style.display = 'inline-flex';
                     micButton.disabled = false;
@@ -771,7 +754,6 @@ if (promptTextarea) {
                 if (stopButton) stopButton.style.display = 'none';
             }
         } else {
-            // Jika logout: Sembunyikan Send & Stop, tampilkan Mic (tapi disabled)
             if (micButton) {
                 micButton.style.display = 'inline-flex';
                 micButton.disabled = true;
@@ -783,11 +765,11 @@ if (promptTextarea) {
 }
 
 
-// --- Event Listener Tombol Auth Header (Untuk Buka/Tutup Popup) ---
+// --- Event Listener Tombol Auth Header ---
 [authButtonDesktop, authButtonMobile].forEach(button => {
     if (button) {
         button.addEventListener('click', (event) => {
-            event.stopPropagation(); // Hentikan event agar tidak ditangkap document listener
+            event.stopPropagation();
             toggleAuthPopup();
         });
     }
@@ -797,28 +779,24 @@ if (promptTextarea) {
 if (popupSigninButton) {
     popupSigninButton.addEventListener('click', () => {
         signInWithGoogle();
-        toggleAuthPopup(); // Tutup popup setelah klik sign in
+        toggleAuthPopup();
     });
 }
 if (popupSignoutButton) {
     popupSignoutButton.addEventListener('click', () => {
         if (confirm("Apakah Anda yakin ingin logout?")) {
             signOutUser();
-            // Popup akan tertutup otomatis oleh onAuthStateChanged
         }
     });
 }
 
 // --- Event Listener untuk Menutup Popup Saat Klik di Luar ---
 document.addEventListener('click', (event) => {
-    // Tutup dropdown model jika terbuka
      const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
                                   modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
                                   !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
                                   !modelDropdownMenu.contains(event.target);
      if (isClickOutsideDropdown) { closeModelDropdown(); }
-
-     // Tutup popup auth jika terbuka dan klik di luar
      if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
          !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
          !(authButtonMobile && authButtonMobile.contains(event.target))) {
@@ -826,8 +804,6 @@ document.addEventListener('click', (event) => {
      }
  });
 
-
-// Tombol Send (Gunakan saveMessagesToFirestore - REVISI)
 if (sendButton) {
     sendButton.addEventListener('click', async () => {
         if (!isLoggedIn || !currentUser) {
@@ -841,14 +817,11 @@ if (sendButton) {
             addMessage(messageText, 'user');
             const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
             const userMessageForDb = { role: "user", text: messageText };
-
             const historyForApi = [...currentChatHistory];
-
-            // Update UI State (Generating) -> Panggil event input untuk update tombol
             isGenerating = true;
-            promptTextarea.value = ''; // Kosongkan setelah addMessage
+            promptTextarea.value = '';
             promptTextarea.disabled = true;
-            promptTextarea.dispatchEvent(new Event('input')); // Update tombol ke state generating (tampilkan stop)
+            promptTextarea.dispatchEvent(new Event('input'));
 
             try {
                 const aiResponseText = await callGeminiAPI(messageText, historyForApi);
@@ -864,10 +837,8 @@ if (sendButton) {
             } catch (error) {
                 addMessage(`Error: ${error.message}`, 'ai', true);
             } finally {
-                // Kembalikan UI State -> Panggil event input untuk update tombol
                 isGenerating = false;
                 promptTextarea.disabled = false;
-                // Panggil event input SETELAH isGenerating false dan textarea aktif
                 promptTextarea.dispatchEvent(new Event('input'));
                 promptTextarea.focus();
             }
@@ -875,15 +846,14 @@ if (sendButton) {
     });
 }
 
-// Tombol Stop (Hanya Reset UI - REVISI)
+// Tombol Stop
 if (stopButton) {
     stopButton.addEventListener('click', () => {
         console.log("Stop generation requested (UI only).");
         if (isGenerating) {
-            isGenerating = false; // Set state generating ke false
+            isGenerating = false;
             if (promptTextarea) {
-                promptTextarea.disabled = false; // Aktifkan textarea
-                // Panggil event input untuk mengembalikan tombol ke state non-generating (tampilkan mic)
+                promptTextarea.disabled = false;
                 promptTextarea.dispatchEvent(new Event('input'));
                 promptTextarea.focus();
             }
@@ -910,7 +880,6 @@ if (mobileNewChatButtonHeader) mobileNewChatButtonHeader.addEventListener('click
 // Kirim dengan Enter
 if (promptTextarea) {
     promptTextarea.addEventListener('keydown', (event) => {
-        // Pastikan sendButton ada dan tidak disabled sebelum trigger click
         if (event.key === 'Enter' && !event.shiftKey && sendButton && !sendButton.disabled && !isMobile && isLoggedIn) {
             event.preventDefault();
             sendButton.click();
@@ -929,14 +898,12 @@ function handleModeSwitchClick(event) {
  }
 if (modeSwitcherButton) modeSwitcherButton.addEventListener('click', handleModeSwitchClick);
 if (sidebarModeSwitcherButton) sidebarModeSwitcherButton.addEventListener('click', handleModeSwitchClick);
-// document.addEventListener('click', ...) sudah dimodifikasi di atas
 function handleDropdownItemClick(item) {
     const value = item.dataset.value;
     const role = item.getAttribute('role');
     console.log("Selected:", value, "Role:", role);
 
     if (role === 'menuitemradio') {
-        // Update UI
         document.querySelectorAll('.dropdown-item[role="menuitemradio"]').forEach(radioItem => {
             const isSelected = radioItem.dataset.value === value;
             radioItem.classList.toggle('selected', isSelected);
@@ -944,12 +911,10 @@ function handleDropdownItemClick(item) {
             const checkmark = radioItem.querySelector('.checkmark-icon');
             if (checkmark) checkmark.style.visibility = isSelected ? 'visible' : 'hidden';
         });
-        // Update teks header
         if (selectedModeText) selectedModeText.textContent = value;
         if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = value;
 
-        // Update Model API
-        let newModel = 'gemini-2.0-flash'; // Fallback
+        let newModel = 'gemini-2.0-flash';
         switch (value) {
             case "2.0 Flash": newModel = 'gemini-2.0-flash'; break;
             case "2.5 Flash (experimental)": newModel = 'gemini-2.5-flash-preview-04-17'; break;
@@ -959,14 +924,14 @@ function handleDropdownItemClick(item) {
         if (newModel !== currentModel) {
             currentModel = newModel;
             console.log("API Model changed to:", currentModel);
-            if (isLoggedIn) resetChat(); // Reset hanya jika user login
+            if (isLoggedIn) resetChat();
         } else {
              console.log("Model already set to:", currentModel);
         }
     } else if (value === 'Gemini Advanced') {
         console.log("Upgrade button clicked");
         alert("Membuka halaman upgrade Gemini Advanced (simulasi).");
-        return; // Jangan tutup modal
+        return;
     } else {
         console.log(value + " clicked");
         alert("Fitur " + value + " diaktifkan (simulasi).");
@@ -979,9 +944,7 @@ dropdownItemsMobile.forEach(item => item.addEventListener('click', () => handleD
 
 // --- Inisialisasi Akhir Saat Load ---
 applySidenavState();
-// State awal UI diatur oleh onAuthStateChanged
 isChatStarted = !chatContentWrapper?.querySelector('.welcome-message-container');
-// Inisialisasi model awal
 const initialSelectedItem = document.querySelector('.dropdown-item.selected[role="menuitemradio"]');
 if (initialSelectedItem) {
     const initialValue = initialSelectedItem.dataset.value;
@@ -1000,19 +963,16 @@ if (initialSelectedItem) {
     closeModelBottomSheet();
 } else {
     console.warn("No initial selected model found in HTML. Defaulting to:", currentModel);
-    // Cari item yang data-value-nya cocok dengan default model
-    const defaultItem = document.querySelector(`.dropdown-item[data-value="2.0 Flash"]`); // Ganti "2.0 Flash" jika defaultnya beda
-    const defaultText = defaultItem ? defaultItem.dataset.value : "2.0 Flash"; // Teks default
+    const defaultItem = document.querySelector(`.dropdown-item[data-value="2.0 Flash"]`);
+    const defaultText = defaultItem ? defaultItem.dataset.value : "2.0 Flash";
     if (selectedModeText) selectedModeText.textContent = defaultText;
      if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
 }
 
-// Pastikan tombol stop disembunyikan di awal
 if (stopButton) {
     stopButton.style.display = 'none';
     stopButton.disabled = true;
 }
-// Panggil event input sekali di awal untuk set state tombol mic/send awal
 if (promptTextarea) promptTextarea.dispatchEvent(new Event('input'));
 
 

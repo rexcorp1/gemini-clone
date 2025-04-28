@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +14,6 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* --- Reset & Dasar --- */
         :root {
             /* Warna Dasar */
             --gem-sys-color--surface: #fff;
@@ -33,7 +31,6 @@
             --gem-sys-color--inverse-surface: #e8eaf6;
             --gem-sys-color--on-inverse-surface: #2f3033;
             --gem-sys-color--scrim: rgba(0, 0, 0, 0.32);
-            /* Warna scrim */
 
             /* Warna Lainnya */
             --bard-color-form-field-placeholder: var(--gem-sys-color--on-surface-variant);
@@ -50,12 +47,10 @@
             --menu-button-top: 10px;
             --menu-button-height: 48px;
             --new-chat-margin-top: 40px;
-            /* Disesuaikan karena ada header sidebar mobile */
             --location-footer-height: 60px;
             --dropdown-icon-area-width: 32px;
             --chat-container-padding-x: 16px;
             --bottom-sheet-radius: 16px;
-
             --bottom-area-height: calc(var(--input-area-min-height) + 16px + 16px + 16px);
         }
 
@@ -170,14 +165,11 @@
         /* --- Tombol Menu (di luar sidebar) --- */
         .menu-button-container {
             position: absolute;
-            /* Kembali ke absolute untuk desktop */
             top: var(--menu-button-top);
             left: 14px;
-            /* Geser sedikit ke kiri lagi untuk desktop */
             z-index: 1001;
             height: var(--menu-button-height);
             display: block;
-            /* Tampilkan di desktop */
         }
 
         #menu-toggle-button {
@@ -223,10 +215,8 @@
         /* Header Sidebar Mobile */
         .sidebar-mobile-header {
             display: none;
-            /* Sembunyi di desktop */
             height: var(--header-height);
             padding: 0 8px 0 56px;
-            /* Padding kiri=header utama mobile, kanan dikurangi */
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
@@ -451,8 +441,6 @@
         .sidebar.collapsed .conversation-item-container {
             display: none;
         }
-
-        /* Sembunyikan history di collapsed */
 
         /* Styling untuk item Gems & Footer */
         .sidebar-item {
@@ -791,7 +779,6 @@
         }
 
         .dropdown-item:not(.item-gemini-advanced) .item-icon:empty {
-            /* visibility: hidden; */
         }
 
         .dropdown-item.item-gemini-advanced .item-icon img {
@@ -905,13 +892,10 @@
             border-radius: 50%;
             overflow: hidden;
             background-color: transparent;
-            /* Hapus background default */
             margin-left: 4px;
             display: none;
-            /* Akan diatur oleh media query */
             cursor: pointer;
             border: 1px solid transparent;
-            /* Border agar ukuran konsisten */
             transition: background-color 0.2s ease;
         }
 
@@ -929,51 +913,36 @@
             display: none;
         }
 
-        /* Sembunyikan di desktop */
-
         /* --- CSS untuk Auth State --- */
         .profile-button .user-logged-in {
             display: none;
-            /* Sembunyikan gambar profil secara default */
             width: 100%;
-            /* Pastikan gambar mengisi tombol */
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
-            /* Pastikan gambar bundar */
         }
 
         .profile-button .user-logged-out {
             display: inline-flex;
-            /* Tampilkan ikon login secara default */
             font-size: 24px;
-            /* Sesuaikan ukuran ikon login jika perlu */
             color: var(--gem-sys-color--on-surface-variant);
-            /* Warna ikon login */
             margin: auto;
-            /* Pusatkan ikon */
         }
 
         .profile-button.logged-in .user-logged-in {
             display: block;
-            /* Tampilkan gambar saat logged-in */
         }
 
         .profile-button.logged-in .user-logged-out {
             display: none;
-            /* Sembunyikan ikon login saat logged-in */
         }
 
         /* Style untuk textarea disabled */
         textarea:disabled {
             background-color: #f5f5f5;
-            /* Beri sedikit indikasi visual */
             cursor: not-allowed;
             color: var(--gem-sys-color--on-surface-variant);
         }
-
-        /* --------------------------- */
-
 
         /* --- Chat History Container --- */
         .chat-history-container {
@@ -1340,8 +1309,8 @@
         /* Tombol Stop saat sending */
         .input-area.is-sending .stop-button {
             display: inline-flex;
-            background-color: var(--gem-sys-color--primary-container);
-            color: var(--gem-sys-color--primary);
+            background-color: #d3e3fd;
+            color: #0b57d0;
         }
 
         .input-area.is-sending .stop-button:hover {
@@ -1351,7 +1320,6 @@
         .input-area.is-sending .stop-button .material-symbols-outlined {
             color: inherit;
             font-variation-settings: 'FILL' 1;
-            /* Ikon stop solid */
         }
 
         .input-area.is-sending .send-button {
@@ -1385,7 +1353,6 @@
         /* Tombol Mic */
         .input-area .mic-button .material-symbols-outlined {
             font-variation-settings: 'FILL' 1;
-            /* Ikon mic solid */
         }
 
 
@@ -1465,47 +1432,35 @@
 
         .auth-popup {
             display: none;
-            /* Sembunyikan secara default */
             position: absolute;
             top: calc(var(--header-height) - 8px);
-            /* Sesuaikan jarak dari atas */
             right: 16px;
-            /* Sesuaikan jarak dari kanan */
             background-color: var(--gem-sys-color--surface-container-high);
-            /* Warna background */
             border-radius: 16px;
-            /* Sudut melengkung */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            /* Bayangan */
             padding: 16px;
             z-index: 1003;
-            /* Pastikan di atas elemen lain */
             min-width: 280px;
-            /* Lebar minimum */
             border: 1px solid var(--gem-sys-color--outline-variant);
         }
 
         .auth-popup.show {
             display: block;
-            /* Tampilkan saat class 'show' ditambahkan */
         }
 
         /* Kontrol tampilan logged-in vs logged-out */
         .auth-popup .popup-logged-in,
         .auth-popup .popup-logged-out {
             display: none;
-            /* Sembunyikan kedua section by default */
             text-align: center;
         }
 
         .auth-popup.view-logged-in .popup-logged-in {
             display: block;
-            /* Tampilkan section logged-in jika ada class view-logged-in */
         }
 
         .auth-popup.view-logged-out .popup-logged-out {
             display: block;
-            /* Tampilkan section logged-out jika ada class view-logged-out */
         }
 
 
@@ -1535,7 +1490,6 @@
             color: var(--gem-sys-color--on-surface-variant);
             margin-bottom: 16px;
             word-break: break-all;
-            /* Agar email panjang tidak overflow */
         }
 
         .popup-button {
@@ -1550,7 +1504,6 @@
             transition: background-color 0.2s ease;
             font-size: 14px;
             color: var(--gem-sys-color--primary);
-            /* Warna teks tombol */
             font-weight: 500;
         }
 
@@ -1566,37 +1519,24 @@
                 --bottom-area-height: calc(50px + 12px + 12px + 12px);
             }
 
-            /* Atur layout bubble AI di mobile */
             .model-response .message-bubble {
                 display: flex;
-                /* Gunakan flexbox */
                 flex-wrap: wrap;
-                /* Izinkan item pindah ke baris baru */
                 align-items: center;
-                /* Sejajarkan avatar & ikon titik tiga secara vertikal */
                 justify-content: space-between;
-                /* Dorong avatar ke kiri, ikon ke kanan */
                 gap: 4px 0;
-                /* Jarak vertikal antar baris, tanpa jarak horizontal */
                 position: relative;
-                /* Untuk positioning absolut jika diperlukan nanti */
             }
 
-            /* Pastikan avatar tidak menyusut */
             .model-response .message-avatar {
                 flex-shrink: 0;
-                /* Ukuran dan style lain tetap */
             }
 
-            /* Target khusus untuk tombol titik tiga di mobile */
             .model-response .message-action-more-mobile {
                 display: inline-flex;
-                /* Tampilkan tombol ini */
                 width: 28px;
-                /* Sesuaikan ukuran jika perlu */
                 height: 28px;
                 color: var(--gem-sys-color--on-surface-variant);
-                /* Style lain bisa disamakan dengan .message-actions .icon-button */
             }
 
             .model-response .message-action-more-mobile:hover {
@@ -1607,30 +1547,19 @@
                 font-size: 18px;
             }
 
-
-            /* Wrapper konten (teks & actions asli) ambil lebar penuh & pindah ke bawah */
             .model-response .message-content-wrapper {
                 width: 100%;
-                /* Ambil lebar penuh */
                 order: 3;
-                /* Pastikan muncul setelah avatar dan ikon titik tiga */
                 padding-left: 0;
-                /* Hapus padding kiri default jika ada */
                 margin-top: 4px;
-                /* Beri sedikit jarak dari baris atas */
             }
 
-            /* Sembunyikan container actions asli di mobile */
             .model-response .message-actions {
                 display: none;
             }
 
-            /* Pastikan teks pesan tidak punya padding aneh */
             .model-response .message-text {
-                /* Padding asli (padding: 10px 16px;) mungkin perlu disesuaikan */
-                /* Misalnya, hapus padding kiri/kanan jika wrapper sudah full width */
                 padding: 10px 0;
-                /* Contoh: Hanya padding atas/bawah */
             }
 
             .chat-app {
@@ -1687,48 +1616,33 @@
                 font-size: 24px;
             }
 
-            /* Styling untuk ikon di item history chat */
             .conversation-content .conversation-icon {
                 font-size: 18px;
-                /* Ukuran ikon */
                 color: inherit;
-                /* Warna ikut teks induk */
                 margin-right: 12px;
-                /* Jarak ke kanan dari teks judul */
                 flex-shrink: 0;
-                /* Jangan biarkan ikon menyusut */
                 vertical-align: middle;
-                /* Sejajarkan vertikal (opsional) */
             }
 
-            /* Pastikan padding kiri container cukup */
             .conversation-item-container {
                 padding: 8px 12px 8px 24px;
-                /* Padding kiri asli */
             }
 
-            /* Styling Tombol Stop saat aktif (is-sending) */
             .input-area.is-sending .stop-button {
                 display: inline-flex;
-                background-color: var(--gem-sys-color--primary-container);
-                /* Warna background #d3e3fd */
-                color: var(--gem-sys-color--primary);
-                /* Warna ikon dan teks #0b57d0 */
+                background-color: #d3e3fd;
+                color: #0b57d0;
             }
 
             .input-area.is-sending .stop-button:hover {
-                /* Efek hover sedikit lebih gelap */
                 filter: brightness(95%);
             }
 
             .input-area.is-sending .stop-button .material-symbols-outlined {
                 color: inherit;
-                /* Warna ikon ikut tombol */
                 font-variation-settings: 'FILL' 1;
-                /* <-- Ikon Jadi Solid */
             }
 
-            /* Header utama di chat area */
             .chat-header {
                 padding: 0 12px 0 56px;
                 gap: 8px;
@@ -1770,21 +1684,16 @@
                 display: flex;
             }
 
-            /* Tampilkan di mobile */
             .header-right .upsell-button,
             .header-right .icon-button.storage-button,
             .header-right .profile-button.desktop-only {
                 display: none;
             }
 
-            /* Sembunyikan di mobile */
-
-            /* Tampilkan header di dalam sidebar mobile */
             .sidebar-mobile-header {
                 display: flex;
             }
 
-            /* Sesuaikan padding atas konten sidebar */
             .sidebar-top-content {
                 padding-top: var(--new-chat-margin-top);
             }
@@ -1847,7 +1756,6 @@
             }
         }
 
-        /* Sembunyikan bottom sheet di desktop */
         @media screen and (min-width: 961px) {
 
             .model-bottom-sheet,
@@ -1859,12 +1767,9 @@
                 display: none;
             }
 
-            /* Pastikan header sidebar mobile tersembunyi di desktop */
             .menu-button-container {
                 display: block;
             }
-
-            /* Pastikan tombol menu utama tampil di desktop */
         }
     </style>
 </head>
@@ -1909,9 +1814,7 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-title">Recent</div>
-                <!-- Tempat list chat history -->
                 <ul id="recent-chats-list" class="sidebar-list chat-history-list">
-                    <!-- Akan diisi oleh JavaScript -->
                     <li>Login untuk melihat history</li>
                 </ul>
                 <!-- <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span> <span>More</span> </button> -->
@@ -1919,9 +1822,9 @@
                 <ul class="sidebar-list gem-list">
                     <li class="sidebar-item">
                         <span class="gem-icon-container gem-chess-bg"> <span
-                                class="material-symbols-outlined item-icon">chess</span>
+                                class="material-symbols-outlined item-icon">code</span>
                         </span>
-                        <span class="item-text">Chess champ</span>
+                        <span class="item-text">Coding partner</span>
                     </li>
                     <li class="sidebar-item">
                         <span class="gem-icon-container gem-brainstormer-bg">
@@ -1931,9 +1834,9 @@
                     </li>
                     <li class="sidebar-item">
                         <span class="gem-icon-container gem-career-bg">
-                            <span class="material-symbols-outlined item-icon">work</span>
+                            <span class="material-symbols-outlined item-icon">chess_pawn</span>
                         </span>
-                        <span class="item-text">Career guide</span>
+                        <span class="item-text">Chess champ</span>
                     </li>
                 </ul>
                 <button class="show-more-button"> <span class="material-symbols-outlined">expand_more</span>
@@ -1969,7 +1872,6 @@
                             <span class="material-symbols-outlined gds-icon-s">arrow_drop_down</span>
                         </button>
                         <div class="model-dropdown" id="model-dropdown-menu" role="menu">
-                            <!-- ... (Item dropdown tetap sama) ... -->
                             <div class="dropdown-header">
                                 <div class="item-icon">
                                     <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
@@ -2043,36 +1945,30 @@
                     <button class="icon-button storage-button" aria-label="Files in this chat">
                         <span class="material-symbols-outlined gds-icon-l">home_storage</span>
                     </button>
-                    <!-- Tombol Auth Desktop -->
                     <button class="profile-button desktop-only" id="auth-button-desktop" aria-label="Account">
                         <img id="user-profile-img-desktop" class="user-logged-in" src="" alt="User Profile">
-                        <span id="login-icon-desktop" class="material-symbols-outlined user-logged-out">login</span>
+                        <span id="login-icon-desktop" class="material-symbols-outlined user-logged-out">account_circle</span>
                     </button>
-                    <!-- Tombol Mobile (Add & More) -->
                     <button class="icon-button mobile-only" id="mobile-new-chat-button-header" aria-label="New chat">
                         <span class="material-symbols-outlined">add</span>
                     </button>
                     <button class="icon-button mobile-only" aria-label="More options">
                         <span class="material-symbols-outlined">more_vert</span>
                     </button>
-                    <!-- Tombol Auth Mobile -->
                     <button class="profile-button mobile-only" id="auth-button-mobile" aria-label="Account">
                         <img id="user-profile-img-mobile" class="user-logged-in" src="" alt="User Profile">
-                        <span id="login-icon-mobile" class="material-symbols-outlined user-logged-out">login</span>
+                        <span id="login-icon-mobile" class="material-symbols-outlined user-logged-out">account_circle</span>
                     </button>
                 </div>
             </header>
 
-            <!-- === TAMBAHKAN POPUP MENU DI SINI === -->
             <div id="auth-popup-menu" class="auth-popup">
-                <!-- Konten saat Logged Out -->
                 <div class="popup-logged-out">
                     <img id="popup-default-avatar" src="https://lh3.googleusercontent.com/a/default-user=s64-c"
                         alt="Guest Avatar" class="popup-avatar">
                     <p class="popup-guest-text">Guest</p>
                     <button id="popup-signin-button" class="popup-button">Sign in with Google</button>
                 </div>
-                <!-- Konten saat Logged In -->
                 <div class="popup-logged-in">
                     <img id="popup-user-avatar" src="" alt="User Avatar" class="popup-avatar">
                     <p id="popup-user-name" class="popup-user-name"></p>
@@ -2084,7 +1980,6 @@
             <div class="chat-history-container" id="chat-history">
                 <div class="chat-content-wrapper">
                     <div class="welcome-message-container">
-                        <!-- Teks akan diatur oleh JS -->
                         <h1 id="welcome-heading">Hello, Guest</h1>
                     </div>
                 </div>
@@ -2092,7 +1987,6 @@
 
             <div class="input-container">
                 <div class="input-area" id="input-area">
-                    <!-- Atribut disabled dan placeholder akan diatur oleh JS -->
                     <textarea id="prompt-textarea" placeholder="Silakan login untuk memulai chat..." rows="1"
                         disabled></textarea>
                     <div class="input-bottom-actions">
@@ -2122,7 +2016,6 @@
     </div>
 
     <div class="model-bottom-sheet" id="model-bottom-sheet" role="menu">
-        <!-- ... (Item bottom sheet tetap sama) ... -->
         <div class="dropdown-header">
             <div class="item-icon">
                 <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
@@ -2136,7 +2029,7 @@
                 <span class="item-text-main">2.0 Flash</span>
                 <span class="item-text-sub">Get everyday help</span>
             </div>
-            <span class="material-symbols-outlined checkmark-icon">done</span>
+            <span class="material-symbols-outlined checkmark-icon">check_circle</span>
         </div>
         <div class="dropdown-item" role="menuitemradio" aria-checked="false" data-value="2.5 Flash (experimental)">
             <div class="item-icon"></div>
@@ -2152,7 +2045,7 @@
                 <span class="item-text-main">2.5 Pro (experimental)</span>
                 <span class="item-text-sub">Best for complex tasks</span>
             </div>
-            <span class="material-symbols-outlined checkmark-icon">done</span>
+            <span class="material-symbols-outlined checkmark-icon">check_circle</span>
         </div>
         <div class="dropdown-item" role="menuitem" data-value="Deep Research">
             <div class="item-icon"></div>
@@ -2179,19 +2072,11 @@
             <button class="upgrade-button">Upgrade</button>
         </div>
     </div>
-
-    <!-- Script Firebase & Libraries -->
-    <!-- Ganti ke versi compat -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-
-    <!-- Library Markdown (tetap sama) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
-
-    <!-- Script Aplikasi Kamu -->
     <script src="gemini-chat.js" defer></script>
 </body>
-
 </html>
