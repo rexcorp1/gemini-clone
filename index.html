@@ -985,7 +985,7 @@
             scrollbar-color: var(--gem-sys-color--outline) transparent;
             display: flex;
             flex-direction: column;
-            height: calc(100dvh - var(--header-height) - var(--bottom-area-height));
+            /* height: calc(100dvh - var(--header-height) - var(--bottom-area-height)); */
         }
 
         .chat-history-container::-webkit-scrollbar {
@@ -1635,6 +1635,7 @@
 
             .chat-app {
                 display: block;
+                height: 100dvh;
             }
 
             .sidebar {
@@ -1669,6 +1670,7 @@
 
             .chat-area {
                 width: 100%;
+                height: 100dvh;
                 flex-grow: unset;
             }
 
