@@ -8,13 +8,11 @@ const firebaseConfig = {
     messagingSenderId: "887785035794",
     appId: "1:887785035794:web:acd3409e097bea445320cb",
     measurementId: "G-1Q6LGMHY7P"
-  };
+};
 
-  // --- Variabel State ---
-// ... (variabel state lainnya) ...
-// let currentLoadingMessageElement = null; // <<< GANTI NAMA VARIABEL INI
-let currentLoadingBubbleElement = null; // Untuk menyimpan elemen bubble AI yang sedang loading
-let currentAbortController = null; // Untuk membatalkan fetch
+// --- Variabel State ---
+let currentLoadingBubbleElement = null;
+let currentAbortController = null;
 
 
 // Initialize Firebase (Gunakan sintaks v8/compat)
@@ -86,6 +84,7 @@ const settingsPopupMenu = document.getElementById('settings-popup-menu');
 const settingsDarkModeItem = document.getElementById('settings-dark-mode-item');
 const settingsDarkModeIcon = document.getElementById('settings-dark-mode-icon');
 const settingsDarkModeText = document.getElementById('settings-dark-mode-text');
+const darkModeSwitch = document.getElementById('dark-mode-mdc-switch');
 
 
 
@@ -98,7 +97,6 @@ let isGenerating = false;
 let isChatStarted = !chatContentWrapper.querySelector('.welcome-message-container');
 let currentModel = 'gemini-2.0-flash';
 let currentChatHistory = [];
-
 let isSettingsPopupOpen = false;
 
 // --- Variabel State Auth & Firestore ---
@@ -128,7 +126,6 @@ function toggleAuthPopup() {
     if (!authPopupMenu) return;
 
     if (isAuthPopupOpen) {
-        // Panggil fungsi close yang baru
         closeAuthPopup();
     } else {
         updateAuthPopupContent();
@@ -155,49 +152,45 @@ function closeSettingsPopup() {
 
 function openSettingsPopup() {
     if (settingsPopupMenu && settingsMenuItem) {
-        // Posisikan popup relatif terhadap tombol settings
         const rect = settingsMenuItem.getBoundingClientRect();
-        settingsPopupMenu.style.bottom = `${window.innerHeight - rect.top}px`; // Dari bawah viewport ke atas tombol
-        settingsPopupMenu.style.left = `${rect.left}px`; // Sejajar kiri tombol
-
+        settingsPopupMenu.style.bottom = `${window.innerHeight - rect.top}px`;
+        settingsPopupMenu.style.left = `${rect.left}px`;
         settingsPopupMenu.classList.add('show');
         isSettingsPopupOpen = true;
     }
 }
 
 function toggleSettingsPopup(event) {
-    event.stopPropagation(); // Hentikan event agar tidak menutup popup langsung
+    event.stopPropagation();
     if (isSettingsPopupOpen) {
         closeSettingsPopup();
     } else {
-        closeAuthPopup(); // Tutup popup lain jika terbuka
+        closeAuthPopup();
         closeModelDropdown();
         closeModelBottomSheet();
         openSettingsPopup();
     }
 }
 
-// --- Fungsi Dark Mode ---
+// --- // --- Fungsi Dark Mode ---
 function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        if (settingsDarkModeIcon) settingsDarkModeIcon.textContent = 'light_mode'; // Update ikon di popup
-        if (settingsDarkModeText) settingsDarkModeText.textContent = 'Light theme'; // Update teks di popup
-        if (settingsDarkModeItem) settingsDarkModeItem.setAttribute('aria-checked', 'true'); // Update state ARIA
-    } else {
-        document.body.classList.remove('dark-mode');
-        if (settingsDarkModeIcon) settingsDarkModeIcon.textContent = 'dark_mode'; // Update ikon di popup
-        if (settingsDarkModeText) settingsDarkModeText.textContent = 'Dark theme'; // Update teks di popup
-        if (settingsDarkModeItem) settingsDarkModeItem.setAttribute('aria-checked', 'false'); // Update state ARIA
-    }
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('dark-mode', isDark);
+
+    if (settingsDarkModeIcon) settingsDarkModeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    if (settingsDarkModeText) settingsDarkModeText.textContent = isDark ? 'Light theme' : 'Dark theme';
+
+    // Update state ARIA pada elemen item utama
+    if (settingsDarkModeItem) settingsDarkModeItem.setAttribute('aria-checked', isDark.toString());
 }
+
 
 function toggleTheme() {
     const currentThemeIsDark = document.body.classList.contains('dark-mode');
     const newTheme = currentThemeIsDark ? 'light' : 'dark'; // Tentukan tema baru
-    applyTheme(newTheme); // Terapkan tema baru
+    applyTheme(newTheme);
     try {
-        localStorage.setItem('theme', newTheme); // Simpan preferensi
+        localStorage.setItem('theme', newTheme);
         console.log('Theme preference saved:', newTheme);
     } catch (e) {
         console.warn('Could not save theme preference to localStorage:', e);
@@ -217,7 +210,7 @@ function loadThemePreference() {
                 preferredTheme = 'dark';
                 console.log('Using system preference (dark mode)');
             } else {
-                 console.log('Using default theme (light mode)');
+                console.log('Using default theme (light mode)');
             }
         }
     } catch (e) {
@@ -239,7 +232,7 @@ function closeModelDropdown() {
 
 function closeModelBottomSheet() {
     if (!isSidenavOpen && isMobile) {
-         document.body.style.overflow = '';
+        document.body.style.overflow = '';
     } else if (!isMobile) {
         document.body.style.overflow = '';
     }
@@ -277,8 +270,8 @@ function applySidenavState() {
         document.body.style.overflow = '';
         if (sidebar) sidebar.style.transition = 'width 0.3s ease';
     }
-     closeModelDropdown();
-     closeModelBottomSheet();
+    closeModelDropdown();
+    closeModelBottomSheet();
 }
 
 function openModelBottomSheet() {
@@ -291,12 +284,12 @@ function openModelBottomSheet() {
     document.body.style.overflow = 'hidden';
 }
 
- function openModelDropdown() {
-     if (isMobile || !modelDropdownMenu || !modeSwitcherButton) return;
-     modelDropdownMenu.classList.add('show');
-     modeSwitcherButton.classList.add('open');
-     modeSwitcherButton.setAttribute('aria-expanded', 'true');
- }
+function openModelDropdown() {
+    if (isMobile || !modelDropdownMenu || !modeSwitcherButton) return;
+    modelDropdownMenu.classList.add('show');
+    modeSwitcherButton.classList.add('open');
+    modeSwitcherButton.setAttribute('aria-expanded', 'true');
+}
 
 function handleResize() {
     const nowMobile = window.innerWidth <= 960;
@@ -315,8 +308,8 @@ function handleResize() {
         }
         applySidenavState();
     }
-     closeModelDropdown();
-     closeModelBottomSheet();
+    closeModelDropdown();
+    closeModelBottomSheet();
 }
 
 // --- Fungsi UI: Pesan & Welcome Message ---
@@ -354,7 +347,7 @@ function decodeHtmlEntities(text) {
     return textarea.value;
 }
 
-// --- MODIFIED addMessage Function ---
+// --- addMessage Function ---
 function addMessage(content, sender, options = {}) {
     if (!chatContentWrapper || !chatHistory) return;
 
@@ -370,8 +363,8 @@ function addMessage(content, sender, options = {}) {
 
     if (sender === 'ai') {
         // 1. Avatar Area (akan diisi animasi atau ikon statis)
-        const avatarArea = document.createElement('div'); // Gunakan div terpisah untuk avatar/animasi
-        avatarArea.classList.add('message-avatar'); // Gunakan class avatar yang sudah ada
+        const avatarArea = document.createElement('div');
+        avatarArea.classList.add('message-avatar');
         // avatarArea.style.marginTop = '3px'; // Sesuaikan margin jika perlu
 
         // 2. Wrapper Konten (teks pesan dan actions)
@@ -402,39 +395,35 @@ function addMessage(content, sender, options = {}) {
                     </svg>
                 </div>
             `;
-            bubble.appendChild(avatarArea); // Tambahkan area avatar (dengan animasi) ke bubble
+            bubble.appendChild(avatarArea);
 
             // Tambahkan teks "Just a sec..." ke contentWrapper
             const loadingText = document.createElement('span');
             loadingText.classList.add('ai-loading-text');
             loadingText.textContent = 'Just a sec...';
-            loadingText.style.padding = '10px 0'; // Beri padding agar sejajar
+            loadingText.style.padding = '10px 0';
             contentWrapper.appendChild(loadingText);
+            bubble.appendChild(contentWrapper);
+            currentLoadingBubbleElement = bubble;
 
-            bubble.appendChild(contentWrapper); // Tambahkan contentWrapper ke bubble
-
-            // Simpan elemen BUBBLE untuk diupdate nanti
-            currentLoadingBubbleElement = bubble; // SIMPAN BUBBLE
-            // --- End Loading Indicator ---
 
         } else {
-             // --- Add Final AI Message Content (Avatar + Text + Actions) ---
-             // Ini digunakan saat memuat dari history atau sebagai fallback
+            // --- Add Final AI Message Content (Avatar + Text + Actions) ---
             const aiAvatarSvgString = `&lt;div _ngcontent-ng-c2611952735="" class="avatar avatar_primary ng-tns-c2611952735-19 ng-star-inserted" style=""&gt;&lt;div _ngcontent-ng-c2611952735="" class="avatar_primary_model ng-tns-c2611952735-19 is-gpi-avatar"&gt;&lt;div _ngcontent-ng-c2611952735="" lottie-animation="" class="avatar_primary_animation is-gpi-avatar ng-tns-c2611952735-19 ng-star-inserted" data-test-lottie-animation-status="completed"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"&gt;&lt;defs&gt;&lt;clipPath id="__lottie_element_48_${Date.now()}"&gt;&lt;rect width="32" height="32" x="0" y="0"&gt;&lt;/rect&gt;&lt;/clipPath&gt;&lt;g id="__lottie_element_55_${Date.now()}"&gt;&lt;g transform="matrix(0.9999992251396179,-0.001229780144058168,0.001229780144058168,0.9999992251396179,16,16)" opacity="1" style="display: block;"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_58_${Date.now()})" fill-opacity="1" d=" M0.027000000700354576,14 C0.47999998927116394,6.489999771118164 6.489999771118164,0.47999998927116394 14,0.027000000700354576 C14,0.027000000700354576 14,-0.027000000700354576 14,-0.027000000700354576 C6.489999771118164,-0.47999998927116394 0.47999998927116394,-6.489999771118164 0.027000000700354576,-14 C0.027000000700354576,-14 -0.027000000700354576,-14 -0.027000000700354576,-14 C-0.47999998927116394,-6.489999771118164 -6.489999771118164,-0.47999998927116394 -14,-0.027000000700354576 C-14,-0.027000000700354576 -14,0.027000000700354576 -14,0.027000000700354576 C-6.489999771118164,0.47999998927116394 -0.47999998927116394,6.489999771118164 -0.027000000700354576,14 C-0.027000000700354576,14 0.027000000700354576,14 0.027000000700354576,14z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;linearGradient id="__lottie_element_58_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-9.222999572753906" y1="8.489999771118164" x2="10.461999893188477" y2="-8.211999893188477"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;linearGradient id="__lottie_element_62_${Date.now()}" spreadMethod="pad" gradientUnits="userSpaceOnUse" x1="-4.002999782562256" y1="4.630000114440918" x2="8.092000007629395" y2="-7.886000156402588"&gt;&lt;stop offset="0%" stop-color="rgb(33,123,254)"&gt;&lt;/stop&gt;&lt;stop offset="14%" stop-color="rgb(20,133,252)"&gt;&lt;/stop&gt;&lt;stop offset="27%" stop-color="rgb(7,142,251)"&gt;&lt;/stop&gt;&lt;stop offset="52%" stop-color="rgb(84,143,253)"&gt;&lt;/stop&gt;&lt;stop offset="78%" stop-color="rgb(161,144,255)"&gt;&lt;/stop&gt;&lt;stop offset="89%" stop-color="rgb(175,148,254)"&gt;&lt;/stop&gt;&lt;stop offset="100%" stop-color="rgb(189,153,254)"&gt;&lt;/stop&gt;&lt;/linearGradient&gt;&lt;mask id="__lottie_element_55_1_${Date.now()}" mask-type="alpha"&gt;&lt;use xlink:href="#__lottie_element_55_${Date.now()}"&gt;&lt;/use&gt;&lt;/mask&gt;&lt;/defs&gt;&lt;g clip-path="url(#__lottie_element_48_${Date.now()})"&gt;&lt;g mask="url(#__lottie_element_55_1_${Date.now()})" style="display: block;"&gt;&lt;g transform="matrix(1,0,0,1,16,16)" opacity="1"&gt;&lt;g opacity="1" transform="matrix(1,0,0,1,0,0)"&gt;&lt;path fill="url(#__lottie_element_62_${Date.now()})" fill-opacity="1" d=" M0,-16 C8.830400466918945,-16 16,-8.830400466918945 16,0 C16,8.830400466918945 8.830400466918945,16 0,16 C-8.830400466918945,16 -16,8.830400466918945 -16,0 C-16,-8.830400466918945 -8.830400466918945,-16 0,-16z"&gt;&lt;/path&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/div&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;!----&gt;&lt;/div&gt;&lt;/div&gt;`;
             avatarArea.innerHTML = decodeHtmlEntities(aiAvatarSvgString);
-            bubble.appendChild(avatarArea); // Tambahkan area avatar (dengan ikon statis) ke bubble
+            bubble.appendChild(avatarArea);
 
             const textDiv = document.createElement('div');
             textDiv.classList.add('message-text');
             if (options.isError) {
                 textDiv.style.color = 'red';
                 textDiv.style.fontStyle = 'italic';
-                textDiv.textContent = content; // content adalah teks error
+                textDiv.textContent = content;
             } else {
                 // Terapkan Markdown dan DOMPurify
                 if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
                     try {
-                        const rawHtml = marked.parse(content); // content adalah teks respons AI
+                        const rawHtml = marked.parse(content);
                         const cleanHtml = DOMPurify.sanitize(rawHtml);
                         textDiv.innerHTML = cleanHtml;
                     } catch (parseError) {
@@ -458,7 +447,7 @@ function addMessage(content, sender, options = {}) {
                 contentWrapper.appendChild(actions);
             }
 
-            bubble.appendChild(contentWrapper); // Tambahkan contentWrapper ke bubble
+            bubble.appendChild(contentWrapper);
         }
 
         // 3. Tombol Titik Tiga (Khusus Mobile) - Tambahkan di luar contentWrapper
@@ -466,9 +455,9 @@ function addMessage(content, sender, options = {}) {
         moreButtonMobile.classList.add('icon-button', 'message-action-more-mobile');
         moreButtonMobile.setAttribute('aria-label', 'More options');
         moreButtonMobile.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
-        bubble.appendChild(moreButtonMobile); // Tambahkan tombol more mobile ke bubble
+        bubble.appendChild(moreButtonMobile);
 
-        messageContainer.appendChild(bubble); // Tambahkan bubble ke container
+        messageContainer.appendChild(bubble);
 
     } else {
         // --- Struktur untuk User Query (Tetap Sama) ---
@@ -478,7 +467,7 @@ function addMessage(content, sender, options = {}) {
         contentWrapper.classList.add('message-content-wrapper');
         const textDiv = document.createElement('div');
         textDiv.classList.add('message-text');
-        textDiv.textContent = content; // content adalah teks user
+        textDiv.textContent = content;
         contentWrapper.appendChild(textDiv);
         bubble.appendChild(contentWrapper);
         messageContainer.appendChild(bubble);
@@ -492,11 +481,10 @@ function addMessage(content, sender, options = {}) {
 
 // --- MODIFIED Function untuk Mengupdate Pesan Loading ---
 function updateLoadingMessage(newContent, isError = false) {
-    const bubbleElement = currentLoadingBubbleElement; // Gunakan variabel yang menyimpan bubble
+    const bubbleElement = currentLoadingBubbleElement;
 
     if (!bubbleElement) {
         console.warn("Attempted to update loading message, but no bubble element found.");
-        // Jika tidak ada elemen loading, tambahkan saja sebagai pesan baru (fallback)
         addMessage(newContent, 'ai', { isError: isError });
         return;
     }
@@ -507,9 +495,9 @@ function updateLoadingMessage(newContent, isError = false) {
         loadingIndicator.remove();
     }
     const loadingText = bubbleElement.querySelector('.ai-loading-text');
-     if (loadingText) {
-         loadingText.remove();
-     }
+    if (loadingText) {
+        loadingText.remove();
+    }
 
 
     // 2. Cari atau buat content wrapper
@@ -518,15 +506,14 @@ function updateLoadingMessage(newContent, isError = false) {
         console.warn("Could not find content wrapper in loading bubble. Creating a new one.");
         contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content-wrapper');
-        // Temukan elemen setelah avatar area (jika ada) atau tambahkan di akhir bubble
         const avatarArea = bubbleElement.querySelector('.message-avatar');
         if (avatarArea && avatarArea.nextElementSibling) {
-             bubbleElement.insertBefore(contentWrapper, avatarArea.nextElementSibling);
+            bubbleElement.insertBefore(contentWrapper, avatarArea.nextElementSibling);
         } else {
-             bubbleElement.appendChild(contentWrapper);
+            bubbleElement.appendChild(contentWrapper);
         }
     } else {
-         contentWrapper.innerHTML = ''; // Bersihkan isinya ("Just a sec...")
+        contentWrapper.innerHTML = '';
     }
 
 
@@ -536,7 +523,7 @@ function updateLoadingMessage(newContent, isError = false) {
         console.warn("Could not find avatar area in loading bubble. Creating a new one.");
         avatarArea = document.createElement('div');
         avatarArea.classList.add('message-avatar');
-        bubbleElement.insertBefore(avatarArea, bubbleElement.firstChild); // Tambahkan di awal bubble
+        bubbleElement.insertBefore(avatarArea, bubbleElement.firstChild);
     }
 
     // Isi avatar area dengan SVG statis
@@ -585,22 +572,18 @@ function updateLoadingMessage(newContent, isError = false) {
     }
 
     // 6. Tambahkan kembali tombol more mobile jika perlu (opsional, tergantung struktur akhir)
-    // Tombol ini sudah ada di bubble, tidak perlu ditambahkan lagi di sini
-    // Pastikan struktur HTML di addMessage sudah benar menempatkannya di bubble, bukan contentWrapper
-
-    // Scroll ke bawah lagi
     setTimeout(() => {
         if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
     }, 50);
 
     // Hapus referensi elemen loading
-    currentLoadingBubbleElement = null; // RESET VARIABEL
+    currentLoadingBubbleElement = null;
 }
 
 
 
 // --- Fungsi Inti API (Memanggil Vercel Function) ---
-async function callGeminiAPI(prompt, history, signal) { // <<< PASTIKAN ADA 'signal' DI SINI
+async function callGeminiAPI(prompt, history, signal) {
     const endpoint = '/api/chat';
     const payload = {
         prompt: prompt,
@@ -613,7 +596,7 @@ async function callGeminiAPI(prompt, history, signal) { // <<< PASTIKAN ADA 'sig
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
-            signal: signal // <<< PASTIKAN 'signal' DITERUSKAN KE FETCH
+            signal: signal
         });
         const data = await response.json();
         if (!response.ok) {
@@ -624,16 +607,16 @@ async function callGeminiAPI(prompt, history, signal) { // <<< PASTIKAN ADA 'sig
         if (typeof data.text === 'string') {
             return data.text;
         } else {
-             console.error("Unexpected success response format from server:", data);
-             throw new Error("Received unexpected success response from server.");
+            console.error("Unexpected success response format from server:", data);
+            throw new Error("Received unexpected success response from server.");
         }
     } catch (error) {
-         if (error.name === 'AbortError') { // <<< Tangani AbortError
+        if (error.name === 'AbortError') {
             console.log('Fetch aborted in callGeminiAPI');
-            throw error; // Lempar ulang error spesifik
+            throw error;
         }
         console.error('Failed to call Vercel Function:', error);
-        throw error; // Lempar ulang error lainnya
+        throw error;
     }
 }
 
@@ -646,17 +629,17 @@ function resetChat() {
     if (isGenerating) {
         console.log("Resetting chat while generation is in progress. Aborting...");
         if (currentAbortController) {
-            currentAbortController.abort(); // Batalkan fetch yang sedang berjalan
+            currentAbortController.abort();
         }
         // Hapus elemen loading jika masih ada
-        if (currentLoadingBubbleElement) { // <<< GUNAKAN VARIABEL BARU
-            const bubbleContainer = currentLoadingBubbleElement.closest('.message-container'); // <<< Cari container dari bubble
+        if (currentLoadingBubbleElement) {
+            const bubbleContainer = currentLoadingBubbleElement.closest('.message-container');
             if (bubbleContainer) {
                 bubbleContainer.remove();
             }
-            currentLoadingBubbleElement = null; // <<< RESET VARIABEL BARU
+            currentLoadingBubbleElement = null;
         }
-        // Reset state generating secara paksa
+        // Reset state generating
         isGenerating = false;
         currentAbortController = null;
     }
@@ -665,9 +648,8 @@ function resetChat() {
     if (chatContentWrapper) chatContentWrapper.innerHTML = '';
     if (promptTextarea) {
         promptTextarea.value = '';
-        // Pastikan textarea di-enable jika user login
         promptTextarea.disabled = !isLoggedIn;
-        promptTextarea.dispatchEvent(new Event('input')); // Update tombol mic/send
+        promptTextarea.dispatchEvent(new Event('input'));
     }
     currentChatHistory = [];
     currentChatId = null;
@@ -687,9 +669,9 @@ function resetChat() {
         applySidenavState();
     }
     isChatStarted = false;
-    addWelcomeMessage(); // Tampilkan kembali welcome message
+    addWelcomeMessage();
     console.log("Chat reset complete.");
-    if (isLoggedIn && promptTextarea) promptTextarea.focus(); // Fokus ke input jika login
+    if (isLoggedIn && promptTextarea) promptTextarea.focus();
 }
 
 
@@ -743,21 +725,21 @@ function loadRecentChats(userId) {
     }
 
     const chatsQuery = db.collection('chats')
-                         .where('userId', '==', userId)
-                         .orderBy('lastUpdatedAt', 'desc')
-                         .limit(20);
+        .where('userId', '==', userId)
+        .orderBy('lastUpdatedAt', 'desc')
+        .limit(20);
 
     unsubscribeChatsListener = chatsQuery.onSnapshot(snapshot => {
         recentChatsList.innerHTML = '';
         if (snapshot.empty) {
-          recentChatsList.innerHTML = '<li>No recent chats</li>';
-          return;
+            recentChatsList.innerHTML = '<li>No recent chats</li>';
+            return;
         }
         snapshot.forEach(doc => {
-          const chatData = doc.data();
-          const chatId = doc.id;
-          const listItem = createChatListItem(chatId, chatData.title);
-          recentChatsList.appendChild(listItem);
+            const chatData = doc.data();
+            const chatId = doc.id;
+            const listItem = createChatListItem(chatId, chatData.title);
+            recentChatsList.appendChild(listItem);
         });
         if (currentChatId) {
             highlightSidebarItem(currentChatId);
@@ -766,7 +748,7 @@ function loadRecentChats(userId) {
         console.error("Error getting recent chats:", error);
         recentChatsList.innerHTML = '<li>Error loading history</li>';
         if (error.code === 'permission-denied') {
-             recentChatsList.innerHTML = '<li>Error: Insufficient permissions to load history. Check Firestore rules.</li>';
+            recentChatsList.innerHTML = '<li>Error: Insufficient permissions to load history. Check Firestore rules.</li>';
         }
     });
 }
@@ -783,37 +765,37 @@ async function loadChatDetails(chatId) {
         const docSnap = await chatDocRef.get();
 
         if (docSnap.exists) {
-          const chatData = docSnap.data();
-          chatContentWrapper.innerHTML = '';
+            const chatData = docSnap.data();
+            chatContentWrapper.innerHTML = '';
 
-          if (chatData.messages && Array.isArray(chatData.messages)) {
-            chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
+            if (chatData.messages && Array.isArray(chatData.messages)) {
+                chatData.messages.sort((a, b) => (a.timestamp?.toDate() || 0) - (b.timestamp?.toDate() || 0));
 
-            chatData.messages.forEach(message => {
-              addMessage(message.text, message.role); // Memuat dari history, tidak isLoading
-            });
-            currentChatHistory = chatData.messages.map(msg => ({
-                role: msg.role,
-                parts: [{ text: msg.text }]
-            }));
-            isChatStarted = true;
-          } else {
-            addWelcomeMessage();
-            currentChatHistory = [];
-          }
-          setTimeout(() => { if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight; }, 50);
+                chatData.messages.forEach(message => {
+                    addMessage(message.text, message.role);
+                });
+                currentChatHistory = chatData.messages.map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.text }]
+                }));
+                isChatStarted = true;
+            } else {
+                addWelcomeMessage();
+                currentChatHistory = [];
+            }
+            setTimeout(() => { if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight; }, 50);
         } else {
-          console.log("No such chat document!");
-          chatContentWrapper.innerHTML = '<div>Chat not found. Maybe it was deleted?</div>';
-          currentChatId = null;
-          currentChatHistory = [];
+            console.log("No such chat document!");
+            chatContentWrapper.innerHTML = '<div>Chat not found. Maybe it was deleted?</div>';
+            currentChatId = null;
+            currentChatHistory = [];
         }
-      } catch (error) {
+    } catch (error) {
         console.error("Error getting chat details:", error);
         chatContentWrapper.innerHTML = '<div>Error loading chat.</div>';
         currentChatId = null;
         currentChatHistory = [];
-      }
+    }
 }
 
 async function saveMessagesToFirestore(userMsgDb, aiMsgDb) {
@@ -857,7 +839,7 @@ async function saveMessagesToFirestore(userMsgDb, aiMsgDb) {
         console.error("Error saving messages to Firestore:", error);
         alert("Gagal menyimpan pesan. Silakan coba lagi.");
         if (!currentChatId && error) {
-             currentChatId = null;
+            currentChatId = null;
         }
     }
 }
@@ -927,34 +909,32 @@ if (settingsMenuItem) {
 // Dark Mode Item inside Settings Popup
 if (settingsDarkModeItem) {
     settingsDarkModeItem.addEventListener('click', () => {
-        toggleTheme(); // Panggil fungsi toggle tema yang sudah ada
-        // closeSettingsPopup(); // Tutup popup setelah memilih (opsional)
+        toggleTheme();
     });
 }
+
 
 // --- Event Listener untuk Menutup Popup Saat Klik di Luar ---
 document.addEventListener('click', (event) => {
     const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
-                                 modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
-                                 !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
-                                 !modelDropdownMenu.contains(event.target);
+        modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
+        !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
+        !modelDropdownMenu.contains(event.target);
     if (isClickOutsideDropdown) { closeModelDropdown(); }
 
     // Tutup Auth Popup
     if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
         !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
         !(authButtonMobile && authButtonMobile.contains(event.target))) {
-       toggleAuthPopup(); // Gunakan toggle agar state isAuthPopupOpen terupdate
+        toggleAuthPopup();
     }
 
     // <<< TAMBAHKAN INI: Tutup Settings Popup >>>
     if (isSettingsPopupOpen && settingsPopupMenu && !settingsPopupMenu.contains(event.target) &&
         !(settingsMenuItem && settingsMenuItem.contains(event.target))) {
-       closeSettingsPopup();
+        closeSettingsPopup();
     }
-    // <<< AKHIR TAMBAHAN >>>
 });
-
 
 
 // --- Listener Status Autentikasi ---
@@ -1046,7 +1026,6 @@ window.addEventListener('resize', handleResize);
 // Input Area Logic
 if (promptTextarea) {
     promptTextarea.addEventListener('input', () => {
-        // ... (kode resize textarea tetap sama) ...
         promptTextarea.style.height = 'auto';
         let scrollHeight = promptTextarea.scrollHeight;
         const maxHeightStyle = getComputedStyle(promptTextarea).maxHeight;
@@ -1119,19 +1098,19 @@ if (popupSignoutButton) {
 
 // --- Event Listener untuk Menutup Popup Saat Klik di Luar ---
 document.addEventListener('click', (event) => {
-     const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
-                                  modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
-                                  !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
-                                  !modelDropdownMenu.contains(event.target);
-     if (isClickOutsideDropdown) { closeModelDropdown(); }
-     if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
-         !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
-         !(authButtonMobile && authButtonMobile.contains(event.target))) {
+    const isClickOutsideDropdown = !isMobile && modelDropdownMenu?.classList.contains('show') &&
+        modeSwitcherButton && !modeSwitcherButton.contains(event.target) &&
+        !(sidebarModeSwitcherButton && sidebarModeSwitcherButton.contains(event.target)) &&
+        !modelDropdownMenu.contains(event.target);
+    if (isClickOutsideDropdown) { closeModelDropdown(); }
+    if (isAuthPopupOpen && authPopupMenu && !authPopupMenu.contains(event.target) &&
+        !(authButtonDesktop && authButtonDesktop.contains(event.target)) &&
+        !(authButtonMobile && authButtonMobile.contains(event.target))) {
         toggleAuthPopup();
-     }
- });
+    }
+});
 
- if (sendButton) {
+if (sendButton) {
     sendButton.addEventListener('click', async () => {
         if (!isLoggedIn || !currentUser) {
             alert("Silakan login terlebih dahulu untuk mengirim pesan.");
@@ -1141,7 +1120,7 @@ document.addEventListener('click', (event) => {
 
         const messageText = promptTextarea.value.trim();
         if (messageText && !isGenerating) {
-            addMessage(messageText, 'user'); // Tambahkan pesan user
+            addMessage(messageText, 'user');
             const userMessageForHistory = { role: "user", parts: [{ text: messageText }] };
             const userMessageForDb = { role: "user", text: messageText };
             const historyForApi = [...currentChatHistory];
@@ -1150,24 +1129,18 @@ document.addEventListener('click', (event) => {
             isGenerating = true;
             promptTextarea.value = '';
             promptTextarea.disabled = true;
-            promptTextarea.dispatchEvent(new Event('input')); // Update UI (tampilkan tombol stop)
-            addMessage(null, 'ai', { isLoading: true }); // <<< TAMBAHKAN INDIKATOR LOADING (Ini akan membuat bubble loading)
+            promptTextarea.dispatchEvent(new Event('input'));
+            addMessage(null, 'ai', { isLoading: true });
             // --- Akhir Loading ---
 
-            currentAbortController = new AbortController(); // Buat controller baru
+            currentAbortController = new AbortController();
 
             try {
-                // Panggil API dengan signal
-                const aiResponseText = await callGeminiAPI(messageText, historyForApi, currentAbortController.signal); // <<< PANGGIL DENGAN SIGNAL
-
-                // --- Update Pesan Loading dengan Sukses ---
-                updateLoadingMessage(aiResponseText); // <<< UPDATE PESAN LOADING
-                // --- Akhir Update ---
+                const aiResponseText = await callGeminiAPI(messageText, historyForApi, currentAbortController.signal);
+                updateLoadingMessage(aiResponseText);
 
                 const aiMessageForHistory = { role: "model", parts: [{ text: aiResponseText }] };
                 const aiMessageForDb = { role: "model", text: aiResponseText };
-
-                // Simpan ke Firestore setelah respons diterima dan ditampilkan
                 await saveMessagesToFirestore(userMessageForDb, aiMessageForDb);
 
                 // Update history lokal
@@ -1175,26 +1148,21 @@ document.addEventListener('click', (event) => {
                 currentChatHistory.push(aiMessageForHistory);
 
             } catch (error) {
-                 if (error.name === 'AbortError') {
+                if (error.name === 'AbortError') {
                     console.log('Fetch aborted by user.');
-                    // --- Update Pesan Loading dengan Pesan Stop ---
-                    updateLoadingMessage("Generation stopped.", true); // <<< UPDATE DENGAN PESAN STOP
-                    // --- Akhir Update ---
+                    updateLoadingMessage("Generation stopped.", true);
                 } else {
                     console.error("Error during API call or processing:", error);
-                    // --- Update Pesan Loading dengan Error ---
-                    updateLoadingMessage(`Error: ${error.message}`, true); // <<< UPDATE DENGAN PESAN ERROR
-                    // --- Akhir Update ---
+                    updateLoadingMessage(`Error: ${error.message}`, true);
                 }
             } finally {
                 isGenerating = false;
-                currentAbortController = null; // Hapus controller
+                currentAbortController = null;
                 if (promptTextarea) {
                     promptTextarea.disabled = false;
-                    promptTextarea.dispatchEvent(new Event('input')); // Update UI (sembunyikan stop, tampilkan mic/send)
+                    promptTextarea.dispatchEvent(new Event('input'));
                     promptTextarea.focus();
                 }
-                // currentLoadingBubbleElement sudah direset di updateLoadingMessage
             }
         }
     });
@@ -1206,9 +1174,7 @@ if (stopButton) {
     stopButton.addEventListener('click', () => {
         if (isGenerating && currentAbortController) {
             console.log("Stop generation requested. Aborting fetch...");
-            currentAbortController.abort(); // Kirim sinyal abort ke fetch
-            // Tombol stop akan dinonaktifkan/disembunyikan di blok finally sendButton
-            // Kita bisa langsung disable di sini untuk feedback cepat
+            currentAbortController.abort();
             stopButton.disabled = true;
         } else {
             console.log("Stop button clicked but not generating or no controller.");
@@ -1243,13 +1209,13 @@ if (promptTextarea) {
 
 // Mode Switcher & Dropdown/Bottom Sheet Logic
 function handleModeSwitchClick(event) {
-     event.stopPropagation();
-     if (isMobile) {
-         isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
-     } else {
-         modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
-     }
- }
+    event.stopPropagation();
+    if (isMobile) {
+        isBottomSheetOpen ? closeModelBottomSheet() : openModelBottomSheet();
+    } else {
+        modelDropdownMenu?.classList.contains('show') ? closeModelDropdown() : openModelDropdown();
+    }
+}
 if (modeSwitcherButton) modeSwitcherButton.addEventListener('click', handleModeSwitchClick);
 if (sidebarModeSwitcherButton) sidebarModeSwitcherButton.addEventListener('click', handleModeSwitchClick);
 function handleDropdownItemClick(item) {
@@ -1278,9 +1244,9 @@ function handleDropdownItemClick(item) {
         if (newModel !== currentModel) {
             currentModel = newModel;
             console.log("API Model changed to:", currentModel);
-            if (isLoggedIn) resetChat(); // Reset chat saat model berubah
+            if (isLoggedIn) resetChat();
         } else {
-             console.log("Model already set to:", currentModel);
+            console.log("Model already set to:", currentModel);
         }
     } else if (value === 'Gemini Advanced') {
         console.log("Upgrade button clicked");
@@ -1320,7 +1286,7 @@ if (initialSelectedItem) {
     const defaultItem = document.querySelector(`.dropdown-item[data-value="2.0 Flash"]`);
     const defaultText = defaultItem ? defaultItem.dataset.value : "2.0 Flash";
     if (selectedModeText) selectedModeText.textContent = defaultText;
-     if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
+    if (sidebarSelectedModeText) sidebarSelectedModeText.textContent = defaultText;
 }
 
 if (stopButton) {
